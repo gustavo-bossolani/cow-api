@@ -29,7 +29,7 @@ export class StatementController {
 
   @Delete('/:id')
   deleteStatemetnById(@Param('id') id: string, @Res() response: Response) {
-    this.statementService.deleteStatemetnById(id);
+    this.statementService.deleteStatementById(id);
     return response.status(204).send();
   }
 

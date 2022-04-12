@@ -40,7 +40,7 @@ export class StatementService {
     throw new NotFoundException();
   }
 
-  deleteStatemetnById(id: string): void {
+  deleteStatementById(id: string): void {
     this.findStatemetById(id);
     this.statements = this.statements.filter(
       (statement) => statement.id !== id,
