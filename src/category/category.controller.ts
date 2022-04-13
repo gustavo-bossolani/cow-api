@@ -1,5 +1,12 @@
 import { CategoryService } from './category.service';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  NotFoundException,
+} from '@nestjs/common';
 import { FilterCategoryDto } from './dto/filter-category.dto';
 import { Category } from './entity/category.entity';
 
@@ -12,12 +19,16 @@ export class CategoryController {
     return this.categoryService.create(name);
   }
 
-  @Get()
+  @Get('/by')
   getCategory(@Query() filter: FilterCategoryDto): Category {
-    return this.categoryService.getBy(filter);
+    const category = this.categoryService.getBy(filter);
+    if (!category) {
+      throw new NotFoundException();
+    }
+    return category;
   }
 
-  @Get('/all')
+  @Get()
   getAll(): Category[] {
     return this.categoryService.getAll();
   }

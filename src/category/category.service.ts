@@ -25,6 +25,7 @@ export class CategoryService {
     if (id) {
       category = this.categories.find((cat) => cat.id === id);
     }
+
     if (name) {
       category = this.categories.find(
         (cat) => cat.name.toLocaleUpperCase() === name.toLocaleUpperCase(),
