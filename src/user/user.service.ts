@@ -4,16 +4,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserCredentialDto } from './dto/user-credentials.dto';
+import { SignUpCredentialsDto } from './dto/sign-up-credentials.dto';
+import { SignInCredentialsDto } from './dto/sign-in-credentials.dto';
 import { User } from './entity/user.entity';
 
 @Injectable()
 export class UserService {
-  users: User[] = [];
+  private users: User[] = [];
 
-  createUser(createUserDto: CreateUserDto): void {
-    const { name, password, username } = createUserDto;
+  createUser(signUpCredentials: SignUpCredentialsDto): void {
+    const { name, password, username } = signUpCredentials;
+
+    const found = this.users.find((user) => user.username === username);
+
+    if (found) {
+      throw new UnauthorizedException(
+        new DefineError('Username already exists.', 401),
+      );
+    }
 
     const user: User = {
       id: new Date().getMilliseconds().toString(),
@@ -25,8 +33,8 @@ export class UserService {
     this.users.push(user);
   }
 
-  verifyUserCredentials(userCredentialDto: UserCredentialDto): string {
-    const { password, username } = userCredentialDto;
+  verifyUserCredentials(signInCredentials: SignInCredentialsDto): string {
+    const { password, username } = signInCredentials;
 
     const user = this.users.find((user) => user.username === username);
 
