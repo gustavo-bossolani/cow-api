@@ -1,8 +1,16 @@
+import { IsDefined } from 'class-validator';
+
 class CreateStatementDto {
+  @IsDefined()
   title: string;
+
+  @IsDefined()
   description: string;
+
+  @IsDefined()
   installment: number;
-  finishDate: string;
+
+  @IsDefined()
   amount: number;
 }
 

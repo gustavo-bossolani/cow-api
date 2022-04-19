@@ -4,18 +4,18 @@ import { CreateStatementDto } from './dtos/create-statement.dto';
 import { UpdateStatementDto } from './dtos/update-statement.dto';
 
 import { Statement } from './entities/statement.entity';
+import { increaseMonth } from 'src/shared/util/increase-month-date';
 
 @Injectable()
 export class StatementService {
   private statements: Statement[] = [];
 
   createStatement(createStatementDto: CreateStatementDto): Statement {
-    const { description, finishDate, installment, title, amount } =
-      createStatementDto;
+    const { description, installment, title, amount } = createStatementDto;
 
     const statement: Statement = {
       description,
-      finishDate,
+      finishDate: increaseMonth(installment, new Date()),
       installment,
       title,
       amount,
@@ -51,8 +51,14 @@ export class StatementService {
     updateStatementDto: UpdateStatementDto,
     id: string,
   ): Statement {
+    const { installment } = updateStatementDto;
+
     const statement = this.findStatemetById(id);
-    Object.assign(statement, { ...updateStatementDto });
+
+    Object.assign(statement, {
+      ...updateStatementDto,
+      finishDate: increaseMonth(installment, new Date()),
+    });
 
     return statement;
   }
