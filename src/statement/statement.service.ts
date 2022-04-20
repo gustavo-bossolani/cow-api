@@ -5,6 +5,7 @@ import { UpdateStatementDto } from './dtos/update-statement.dto';
 
 import { Statement } from './entities/statement.entity';
 import { increaseMonth } from 'src/shared/util/increase-month-date';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class StatementService {
@@ -21,7 +22,7 @@ export class StatementService {
       amount,
       id: new Date().getMilliseconds().toString(),
       categoryId: new Date().getMilliseconds().toString(),
-      userId: new Date().getMilliseconds().toString(),
+      user: new User(),
     };
 
     this.statements.push(statement);

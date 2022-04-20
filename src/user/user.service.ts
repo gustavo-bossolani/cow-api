@@ -28,6 +28,7 @@ export class UserService {
       name,
       password,
       username,
+      statement: [],
     };
 
     this.users.push(user);
