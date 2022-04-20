@@ -4,8 +4,7 @@ class CreateStatementDto {
   @IsDefined()
   title: string;
 
-  @IsDefined()
-  description: string;
+  description?: string;
 
   @IsDefined()
   installment: number;

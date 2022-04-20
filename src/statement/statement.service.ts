@@ -1,65 +1,66 @@
+import { DefineError } from 'src/shared/models/define-error.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateStatementDto } from './dtos/create-statement.dto';
 import { UpdateStatementDto } from './dtos/update-statement.dto';
 
-import { Statement } from './entities/statement.entity';
 import { increaseMonth } from 'src/shared/util/increase-month-date';
-import { User } from 'src/user/entity/user.entity';
+import { StatementRepository } from './repositories/statement.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Statement } from './entities/statement.entity';
 
 @Injectable()
 export class StatementService {
   private statements: Statement[] = [];
 
-  createStatement(createStatementDto: CreateStatementDto): Statement {
-    const { description, installment, title, amount } = createStatementDto;
+  constructor(
+    @InjectRepository(StatementRepository)
+    private statementRepository: StatementRepository,
+  ) {}
 
-    const statement: Statement = {
-      description,
-      finishDate: increaseMonth(installment, new Date()),
-      installment,
-      title,
-      amount,
-      id: new Date().getMilliseconds().toString(),
-      categoryId: new Date().getMilliseconds().toString(),
-      user: new User(),
-    };
-
-    this.statements.push(statement);
-    return statement;
+  async createStatement(
+    createStatementDto: CreateStatementDto,
+  ): Promise<Statement> {
+    return this.statementRepository.createStatement(createStatementDto);
   }
 
-  getAllStatements(): Statement[] {
-    return this.statements;
+  async getAllStatements(): Promise<Statement[]> {
+    return await this.statementRepository.find();
   }
 
-  findStatemetById(id: string): Statement {
-    const statement = this.statements.find((statement) => statement.id === id);
+  async findStatemetById(id: string): Promise<Statement> {
+    const statement = await this.statementRepository.findOne({ id });
+
     if (statement) {
       return statement;
     }
-    throw new NotFoundException();
+
+    throw new NotFoundException(new DefineError('Statement not found', 404));
   }
 
-  deleteStatementById(id: string): void {
-    this.findStatemetById(id);
-    this.statements = this.statements.filter(
-      (statement) => statement.id !== id,
-    );
+  async deleteStatementById(id: string): Promise<void> {
+    const deleteStatement = await this.statementRepository.delete({ id });
+
+    if (!deleteStatement.affected) {
+      throw new NotFoundException(new DefineError('Statement not found', 404));
+    }
   }
 
-  updateStatement(
+  async updateStatement(
     updateStatementDto: UpdateStatementDto,
     id: string,
-  ): Statement {
-    const { installment } = updateStatementDto;
+  ): Promise<Statement> {
+    const statement = await this.findStatemetById(id);
 
-    const statement = this.findStatemetById(id);
+    const { installment } = updateStatementDto;
 
     Object.assign(statement, {
       ...updateStatementDto,
-      finishDate: increaseMonth(installment, new Date()),
+      finishDate: increaseMonth(installment),
     });
+
+    await this.statementRepository.save(statement);
 
     return statement;
   }

@@ -1,5 +1,7 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Category } from 'src/category/entity/category.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 class Statement {
@@ -9,7 +11,7 @@ class Statement {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ default: '' })
   description: string;
 
   @Column()
@@ -21,12 +23,8 @@ class Statement {
   @Column()
   amount: number;
 
-  @ManyToOne((_type) => User, (user) => user.statement, {
-    lazy: true,
-  })
   user: User;
-
-  categoryId: string;
+  category: Category;
 }
 
 export { Statement };
