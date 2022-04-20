@@ -16,9 +16,6 @@ class User {
   @Column()
   password: string;
 
-  @OneToMany((_type) => Statement, (statement) => statement.user, {
-    lazy: true,
-  })
   statement: Statement[];
 }
 
