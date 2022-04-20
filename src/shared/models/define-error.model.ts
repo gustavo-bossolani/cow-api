@@ -1,10 +1,10 @@
 class DefineError {
-  private message: string;
   private statusCode: number;
+  private message: string;
 
   constructor(message: string, statusCode: number) {
-    this.message = message;
     this.statusCode = statusCode;
+    this.message = message;
   }
 }
 
