@@ -24,7 +24,7 @@ export class StatementController {
   @HttpCode(201)
   createStatement(
     @Body() createStatementDto: CreateStatementDto,
-  ): Promise<Statement> {
+  ): Promise<void> {
     return this.statementService.createStatement(createStatementDto);
   }
 
@@ -40,10 +40,11 @@ export class StatementController {
   }
 
   @Patch('/:id')
+  @HttpCode(204)
   updateStatement(
     @Body() updateStatementDto: UpdateStatementDto,
     @Param('id') id: string,
-  ): Promise<Statement> {
+  ): Promise<void> {
     return this.statementService.updateStatement(updateStatementDto, id);
   }
 }

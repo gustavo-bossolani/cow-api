@@ -1,28 +1,37 @@
-import { DefineError } from 'src/shared/models/define-error.model';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
+
+import { DefineError } from 'src/shared/models/define-error.model';
 
 import { CreateStatementDto } from './dtos/create-statement.dto';
 import { UpdateStatementDto } from './dtos/update-statement.dto';
 
 import { increaseMonth } from 'src/shared/util/increase-month-date';
 import { StatementRepository } from './repositories/statement.repository';
-import { InjectRepository } from '@nestjs/typeorm';
 
 import { Statement } from './entities/statement.entity';
+import { Category } from 'src/category/entity/category.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class StatementService {
-  private statements: Statement[] = [];
-
   constructor(
     @InjectRepository(StatementRepository)
     private statementRepository: StatementRepository,
+
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
-  async createStatement(
-    createStatementDto: CreateStatementDto,
-  ): Promise<Statement> {
-    return this.statementRepository.createStatement(createStatementDto);
+  async createStatement(createStatementDto: CreateStatementDto): Promise<void> {
+    const { categoryId } = createStatementDto;
+
+    const category: Category = await this.findCategory(categoryId);
+
+    await this.statementRepository.createStatement(
+      createStatementDto,
+      category,
+    );
   }
 
   async getAllStatements(): Promise<Statement[]> {
@@ -50,18 +59,35 @@ export class StatementService {
   async updateStatement(
     updateStatementDto: UpdateStatementDto,
     id: string,
-  ): Promise<Statement> {
+  ): Promise<void> {
     const statement = await this.findStatemetById(id);
 
-    const { installment } = updateStatementDto;
+    const { installment, categoryId } = updateStatementDto;
+
+    const category: Category = await this.findCategory(categoryId);
 
     Object.assign(statement, {
       ...updateStatementDto,
-      finishDate: increaseMonth(installment),
+      finishDate: installment
+        ? increaseMonth(installment)
+        : statement.finishDate,
+      category,
     });
 
     await this.statementRepository.save(statement);
+  }
 
-    return statement;
+  private async findCategory(id: string) {
+    let category: Category;
+    if (id) {
+      category = await this.categoryRepository.findOne({ id: id });
+
+      if (!category) {
+        throw new NotFoundException(
+          new DefineError('Category not found.', 404),
+        );
+      }
+    }
+    return category;
   }
 }

@@ -4,14 +4,15 @@ import { increaseMonth } from 'src/shared/util/increase-month-date';
 
 import { CreateStatementDto } from '../dtos/create-statement.dto';
 
-import { Category } from 'src/category/entity/category.entity';
 import { Statement } from '../entities/statement.entity';
 import { User } from 'src/user/entity/user.entity';
+import { Category } from 'src/category/entity/category.entity';
 
 @EntityRepository(Statement)
 class StatementRepository extends Repository<Statement> {
   async createStatement(
     createStatementDto: CreateStatementDto,
+    category: Category,
   ): Promise<Statement> {
     const { description, installment, title, amount } = createStatementDto;
 
@@ -22,7 +23,7 @@ class StatementRepository extends Repository<Statement> {
       title,
       amount,
       user: new User(),
-      category: new Category(),
+      category,
     });
 
     await this.save(statement);

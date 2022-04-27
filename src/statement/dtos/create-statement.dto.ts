@@ -1,4 +1,4 @@
-import { IsDefined } from 'class-validator';
+import { IsDefined, IsOptional, IsUUID } from 'class-validator';
 
 class CreateStatementDto {
   @IsDefined()
@@ -11,6 +11,10 @@ class CreateStatementDto {
 
   @IsDefined()
   amount: number;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 }
 
 export { CreateStatementDto };

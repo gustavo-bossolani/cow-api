@@ -29,10 +29,13 @@ class Statement {
   @Column()
   amount: number;
 
-  user: User;
+  user?: User;
 
-  @ManyToOne((_type) => Category, (category) => category.statement)
-  category: Category;
+  @ManyToOne((_type) => Category, (category) => category.statement, {
+    nullable: true,
+    eager: true,
+  })
+  category?: Category;
 }
 
 export { Statement };
