@@ -10,7 +10,12 @@ class Category {
   @Column()
   name: string;
 
-  @OneToMany((_type) => Statement, (statement) => statement.user)
+  @Column({ nullable: true })
+  color?: string;
+
+  @OneToMany((_type) => Statement, (statement) => statement.user, {
+    nullable: true,
+  })
   statement?: Statement;
 }
 
