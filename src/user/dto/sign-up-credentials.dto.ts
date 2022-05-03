@@ -1,6 +1,6 @@
 import { Matches, MaxLength, MinLength } from 'class-validator';
 
-const regex = /^\S+$/g;
+const regex = /^\S+$/;
 
 class SignUpCredentialsDto {
   name: string;
