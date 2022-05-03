@@ -10,28 +10,22 @@ import { DefineError } from 'src/shared/models/define-error.model';
 import { FilterCategoryDto } from '../dto/filter-category.dto';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 
+import { User } from 'src/user/entity/user.entity';
 import { Category } from 'src/category/entity/category.entity';
 
 @EntityRepository(Category)
 class CategoryRepository extends Repository<Category> {
-  async filterBy(filter: FilterCategoryDto): Promise<Category> {
+  async filterBy(filter: FilterCategoryDto, user: User): Promise<Category> {
     const { id, name } = filter;
-
-    // TODO: fazer validação com class-validator
-    if (!Object.keys(filter).length) {
-      throw new BadRequestException(
-        new DefineError('Isert values to search category.', 400),
-      );
-    }
 
     let category: Category;
 
     if (id) {
-      category = await this.findOne({ id });
+      category = await this.findOne({ id, user });
     }
 
     if (name) {
-      category = await this.findOne({ name });
+      category = await this.findOne({ name, user });
     }
 
     if (!category)
@@ -42,10 +36,11 @@ class CategoryRepository extends Repository<Category> {
 
   async createCategory(
     createCategoryDto: CreateCategoryDto,
+    user: User,
   ): Promise<Category> {
     const { name, color } = createCategoryDto;
 
-    const found = await this.findOne({ name });
+    const found = await this.findOne({ name, user });
 
     if (found) {
       throw new UnauthorizedException(
@@ -53,7 +48,7 @@ class CategoryRepository extends Repository<Category> {
       );
     }
 
-    const category = this.create({ name, color });
+    const category = this.create({ name, color, user });
 
     await this.save(category);
 
