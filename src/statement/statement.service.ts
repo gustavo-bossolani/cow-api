@@ -9,6 +9,7 @@ import { UpdateStatementDto } from './dtos/update-statement.dto';
 import { increaseMonth } from 'src/shared/util/increase-month-date';
 import { StatementRepository } from './repositories/statement.repository';
 
+import { User } from 'src/user/entity/user.entity';
 import { Statement } from './entities/statement.entity';
 import { Category } from 'src/category/entity/category.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +24,10 @@ export class StatementService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async createStatement(createStatementDto: CreateStatementDto): Promise<void> {
+  async createStatement(
+    createStatementDto: CreateStatementDto,
+    user: User,
+  ): Promise<void> {
     const { categoryId } = createStatementDto;
 
     const category: Category = await this.findCategory(categoryId);
@@ -31,15 +35,16 @@ export class StatementService {
     await this.statementRepository.createStatement(
       createStatementDto,
       category,
+      user,
     );
   }
 
-  async getAllStatements(): Promise<Statement[]> {
-    return await this.statementRepository.find();
+  async getAllStatements(user: User): Promise<Statement[]> {
+    return await this.statementRepository.find({ where: { user } });
   }
 
-  async findStatemetById(id: string): Promise<Statement> {
-    const statement = await this.statementRepository.findOne({ id });
+  async findStatemetById(id: string, user: User): Promise<Statement> {
+    const statement = await this.statementRepository.findOne({ id, user });
 
     if (statement) {
       return statement;
@@ -48,8 +53,8 @@ export class StatementService {
     throw new NotFoundException(new DefineError('Statement not found', 404));
   }
 
-  async deleteStatementById(id: string): Promise<void> {
-    const deleteStatement = await this.statementRepository.delete({ id });
+  async deleteStatementById(id: string, user: User): Promise<void> {
+    const deleteStatement = await this.statementRepository.delete({ id, user });
 
     if (!deleteStatement.affected) {
       throw new NotFoundException(new DefineError('Statement not found', 404));
@@ -59,8 +64,9 @@ export class StatementService {
   async updateStatement(
     updateStatementDto: UpdateStatementDto,
     id: string,
+    user: User,
   ): Promise<void> {
-    const statement = await this.findStatemetById(id);
+    const statement = await this.findStatemetById(id, user);
 
     const { installment, categoryId } = updateStatementDto;
 

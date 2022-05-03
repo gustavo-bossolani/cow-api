@@ -13,6 +13,7 @@ class StatementRepository extends Repository<Statement> {
   async createStatement(
     createStatementDto: CreateStatementDto,
     category: Category,
+    user: User,
   ): Promise<Statement> {
     const { description, installment, title, amount } = createStatementDto;
 
@@ -22,7 +23,7 @@ class StatementRepository extends Repository<Statement> {
       installment,
       title,
       amount,
-      user: new User(),
+      user,
       category,
     });
 
