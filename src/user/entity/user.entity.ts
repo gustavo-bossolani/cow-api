@@ -1,6 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { Statement } from 'src/statement/entities/statement.entity';
+import { Category } from 'src/category/entity/category.entity';
 
 @Entity()
 class User {
@@ -10,13 +17,19 @@ class User {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
   password: string;
 
+  @OneToMany((_type) => Statement, (statement) => statement.user, {
+    eager: false,
+  })
   statement: Statement[];
+
+  @ManyToOne(() => Category, (category) => category.user)
+  category: Category;
 }
 
 export { User };

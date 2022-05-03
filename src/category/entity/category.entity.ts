@@ -1,6 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { Statement } from 'src/statement/entities/statement.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Entity()
 class Category {
@@ -17,6 +24,9 @@ class Category {
     nullable: true,
   })
   statement?: Statement;
+
+  @ManyToOne(() => User, (user) => user.category, { nullable: false })
+  user: User;
 }
 
 export { Category };
