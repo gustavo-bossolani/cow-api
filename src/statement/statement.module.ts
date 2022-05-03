@@ -1,6 +1,7 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 
+import { AuthModule } from './../auth/auth.module';
 import { CategoryModule } from 'src/category/category.module';
 
 import { StatementController } from './statement.controller';
@@ -14,6 +15,7 @@ import { Statement } from 'src/statement/entities/statement.entity';
   imports: [
     TypeOrmModule.forFeature([StatementRepository, Statement]),
     CategoryModule,
+    AuthModule,
   ],
   providers: [StatementService],
   controllers: [StatementController],
