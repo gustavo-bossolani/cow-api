@@ -1,17 +1,29 @@
-import { UserService } from './../user/user.service';
 import { Injectable } from '@nestjs/common';
-import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
-import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from './../user/user.service';
+
+import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
+import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  signUp(signUpCredentials: SignUpCredentialsDto): void {
-    return this.userService.createUser(signUpCredentials);
+  async signUp(signUpCredentials: SignUpCredentialsDto): Promise<void> {
+    return await this.userService.createUser(signUpCredentials);
   }
 
-  signIn(signInCredentials: SignInCredentialsDto): string {
-    return this.userService.verifyUserCredentials(signInCredentials);
+  async signIn(
+    signInCredentials: SignInCredentialsDto,
+  ): Promise<{ access: string }> {
+    const { username } = await this.userService.verifyUserCredentials(
+      signInCredentials,
+    );
+
+    const access = await this.jwtService.sign({ username });
+    return { access };
   }
 }
