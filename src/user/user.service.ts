@@ -1,54 +1,37 @@
-import { DefineError } from 'src/shared/models/define-error.model';
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import * as bcrypt from 'bcrypt';
+
 import { SignUpCredentialsDto } from './dto/sign-up-credentials.dto';
 import { SignInCredentialsDto } from './dto/sign-in-credentials.dto';
+
 import { User } from './entity/user.entity';
+
+import { UserRepository } from './repositories/user.repository';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
+  ) {}
 
-  createUser(signUpCredentials: SignUpCredentialsDto): void {
-    const { name, password, username } = signUpCredentials;
-
-    const found = this.users.find((user) => user.username === username);
-
-    if (found) {
-      throw new UnauthorizedException(
-        new DefineError('Username already exists.', 401),
-      );
-    }
-
-    const user: User = {
-      id: new Date().getMilliseconds().toString(),
-      name,
-      password,
-      username,
-      statement: [],
-    };
-
-    this.users.push(user);
+  async createUser(signUpCredentials: SignUpCredentialsDto): Promise<void> {
+    return await this.userRepository.createUser(signUpCredentials);
   }
 
-  verifyUserCredentials(signInCredentials: SignInCredentialsDto): string {
+  async verifyUserCredentials(
+    signInCredentials: SignInCredentialsDto,
+  ): Promise<User> {
     const { password, username } = signInCredentials;
 
-    const user = this.users.find((user) => user.username === username);
+    const user = await this.userRepository.findOne({ username });
 
-    if (!user) {
-      throw new NotFoundException(new DefineError('User not found.', 404));
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
     }
 
-    if (user.password === password) {
-      return 'OK';
-    }
-
-    throw new UnauthorizedException(
-      new DefineError('Check user credentials', 401),
-    );
+    throw new UnauthorizedException('Check your credentials.');
   }
 }
