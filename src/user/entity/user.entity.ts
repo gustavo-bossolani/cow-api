@@ -28,8 +28,8 @@ class User {
   })
   statement: Statement[];
 
-  @ManyToOne(() => Category, (category) => category.user)
-  category: Category;
+  @OneToMany(() => Category, (category) => category.user, { eager: false })
+  category: Category[];
 }
 
 export { User };
