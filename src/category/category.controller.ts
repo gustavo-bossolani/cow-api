@@ -11,15 +11,17 @@ import {
 } from '@nestjs/common';
 
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
-
+import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CategoryService } from './category.service';
+import { ParseToNumber } from 'src/shared/pipes/parse-to-number/parse-to-number.decorator';
 
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilterCategoryDto } from './dto/filter-category.dto';
+import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 
+import { Page } from 'src/shared/components/pagination/page.model';
 import { User } from 'src/user/entity/user.entity';
 import { Category } from './entity/category.entity';
-import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('category')
 @UseGuards(SessionAuthGuard)
@@ -43,8 +45,11 @@ export class CategoryController {
   }
 
   @Get()
-  getAll(@GetUser() user: User): Promise<Category[]> {
-    return this.categoryService.getAll(user);
+  getAll(
+    @GetUser() user: User,
+    @Query(ParseToNumber) options: PaginatorOptionsDto,
+  ): Promise<Page<Category>> {
+    return this.categoryService.getCategories(user, options);
   }
 
   @Delete('/:id')
