@@ -1,10 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
 import { DefineError } from 'src/shared/models/define-error.model';
 
 import { CreateStatementDto } from './dtos/create-statement.dto';
 import { UpdateStatementDto } from './dtos/update-statement.dto';
+import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 
 import { increaseMonth } from 'src/shared/util/increase-month-date';
 import { StatementRepository } from './repositories/statement.repository';
@@ -12,7 +14,8 @@ import { StatementRepository } from './repositories/statement.repository';
 import { User } from 'src/user/entity/user.entity';
 import { Statement } from './entities/statement.entity';
 import { Category } from 'src/category/entity/category.entity';
-import { Repository } from 'typeorm';
+import { Page } from 'src/shared/components/pagination/page.model';
+import { Paginator } from 'src/shared/components/pagination/paginator.model';
 
 @Injectable()
 export class StatementService {
@@ -39,8 +42,19 @@ export class StatementService {
     );
   }
 
-  async getAllStatements(user: User): Promise<Statement[]> {
-    return await this.statementRepository.find({ where: { user } });
+  async getAllStatements(
+    user: User,
+    options: PaginatorOptionsDto,
+  ): Promise<Page<Statement>> {
+    const { limit, page } = options;
+
+    const [results, total] = await this.statementRepository.findAndCount({
+      take: limit,
+      skip: Paginator.calculateOffset(page, limit),
+      where: { user },
+    });
+
+    return new Page({ options, results, total });
   }
 
   async findStatemetById(id: string, user: User): Promise<Statement> {
