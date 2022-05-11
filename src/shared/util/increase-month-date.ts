@@ -1,20 +1,12 @@
-const options: Intl.DateTimeFormatOptions = {
-  day: 'numeric',
-  month: 'numeric',
-  year: 'numeric',
-};
-
-const language = 'pt-br';
-
 const increaseMonth = (quantity: number): string => {
   const date = new Date();
+  date.setHours(0, 0, 0, 0);
 
-  if (!quantity) {
-    return new Date().toLocaleDateString(language, options);
+  if (quantity) {
+    date.setMonth(date.getMonth() + quantity);
   }
 
-  date.setMonth(date.getMonth() + quantity);
-  return date.toLocaleDateString(language, options);
+  return date.toISOString().split('T')[0];
 };
 
 export { increaseMonth };
