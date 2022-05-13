@@ -20,7 +20,7 @@ class Statement {
   @Column()
   finishDate: string;
 
-  @Column()
+  @Column({ type: 'decimal', scale: 2 })
   amount: number;
 
   @ManyToOne((_type) => User, (user) => user.statement, { nullable: false })
@@ -28,7 +28,6 @@ class Statement {
 
   @ManyToOne((_type) => Category, (category) => category.statement, {
     nullable: true,
-    eager: true,
   })
   category?: Category;
 }
