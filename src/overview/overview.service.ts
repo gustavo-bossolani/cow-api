@@ -1,32 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategoryRepository } from 'src/category/repositories/category.repository';
+
 import { StatementRepository } from 'src/statement/repositories/statement.repository';
+
+import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
+
 import { User } from 'src/user/entity/user.entity';
-import { MoreThan } from 'typeorm';
 
 @Injectable()
 export class OverviewService {
   constructor(
     @InjectRepository(StatementRepository)
     private statementRepository: StatementRepository,
-
-    @InjectRepository(CategoryRepository)
-    private categoryRepository: CategoryRepository,
   ) {}
 
   async getStatementsOverViewAll(user: User) {
-    const response = await Promise.all([
-      // get and count all categories off all statements
-      this.statementRepository.countStatementsPerCategory(user),
+    const [statementsPerCategory, statementsWithInstallment] =
+      await Promise.all([
+        this.statementRepository.countAllFutureStatementsPerCategory(user),
+        this.statementRepository.countAllFutureStatementsAndAmountIfHasInstallment(
+          user,
+        ),
+      ]);
 
-      // get and count all statements with installment > 0 with toal amount
-      this.statementRepository.countStatementsAndAmountIfHasInstallment(user),
-    ]);
+    return { statementsPerCategory, statementsWithInstallment };
+  }
 
-    const [totalStatementsPerCategory, totalStatementsWithInstallment] =
-      response;
+  async getStatementsOverviewMonthly(
+    month: number,
+    user: User,
+    options: PaginatorOptionsDto,
+  ) {
+    const paginator = (await this.statementRepository.getStatementsPerMonth(
+      month,
+      user,
+      options,
+    )) as any;
 
-    return { totalStatementsPerCategory, totalStatementsWithInstallment };
+    paginator.results.map((result) => delete result.userId);
+
+    const [statementsPerCategory, statementsWithInstallment] =
+      await Promise.all([
+        this.statementRepository.countStatementsPerCategory(user, month),
+        this.statementRepository.countStatementsAndAmountIfHasInstallment(
+          user,
+          month,
+        ),
+      ]);
+
+    return {
+      paginator,
+      statementsPerCategory,
+      statementsWithInstallment,
+    };
   }
 }
