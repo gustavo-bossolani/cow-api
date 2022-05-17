@@ -7,7 +7,12 @@ class SignUpCredentialsDto {
   @ApiProperty({ example: 'Something' })
   name: string;
 
-  @ApiProperty({ example: 'strong_man' })
+  @ApiProperty({
+    example: 'strong_man',
+    minLength: 3,
+    maxLength: 16,
+    uniqueItems: true,
+  })
   @MinLength(3, {
     message: 'Username should have between 3 and 16 characters.',
   })
