@@ -4,7 +4,11 @@ import { TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
 export class SessionAuthGuard extends AuthGuard('jwt') {
-  handleRequest(err, user, info: Error) {
+  handleRequest(_, user, info: Error) {
+    if (info && info.message.includes('No auth token')) {
+      throw new UnauthorizedException('No provided token.');
+    }
+
     if (info instanceof TokenExpiredError) {
       throw new UnauthorizedException({
         statusCode: 401,
