@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 
@@ -10,13 +10,16 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
 import { SigninTokenResponseDto } from './dto/signin-token-response.dto';
 
 @ApiTags('Auth')
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+//swagger
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -34,8 +37,12 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Signin user' })
-  @ApiCreatedResponse({ description: 'Confirm the user login' })
   @ApiUnauthorizedResponse({ description: 'Wrong credentials' })
+  @ApiResponse({
+    description: 'A token for session control',
+    type: SigninTokenResponseDto,
+    status: 201,
+  })
   // swagger
   @Post('/signin')
   signIn(
