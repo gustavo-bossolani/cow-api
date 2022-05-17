@@ -9,6 +9,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiHeader,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -23,11 +32,22 @@ import { Page } from 'src/shared/components/pagination/page.model';
 import { User } from 'src/user/entity/user.entity';
 import { Category } from './entity/category.entity';
 
+@ApiTags('Category')
+@ApiBearerAuth()
+@ApiHeader({ name: 'Authorization', example: 'Bearer token' })
+@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+//swagger
 @Controller('category')
 @UseGuards(SessionAuthGuard)
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  @ApiOperation({ summary: 'Create category for a user.' })
+  @ApiUnauthorizedResponse({
+    description: 'When a category defined by name already exists',
+  })
+  @ApiBadRequestResponse({ description: 'If name is not provided' })
+  // swagger
   @Post()
   createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -36,6 +56,7 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto, user);
   }
 
+  //swagger
   @Get('/by')
   getCategory(
     @Query() filter: FilterCategoryDto,
