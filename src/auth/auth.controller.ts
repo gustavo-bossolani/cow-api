@@ -5,11 +5,11 @@ import { AuthService } from './auth.service';
 import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
 import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 import {
-  ApiBody,
+  ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -21,16 +21,22 @@ import { SigninTokenResponseDto } from './dto/signin-token-response.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Signup user' })
+  @ApiCreatedResponse({ description: 'Confirm user creation' })
+  @ApiConflictResponse({ description: 'When username is repeated' })
+  @ApiBadRequestResponse({
+    description: 'When username is out of range and/or  haves spaces',
+  })
+  // swagger
   @Post('/signup')
   signUp(@Body() signUpCredentials: SignUpCredentialsDto): Promise<void> {
     return this.authService.signUp(signUpCredentials);
   }
 
   @ApiOperation({ summary: 'Signin user' })
-  @ApiCreatedResponse({ description: 'Confirm the user creation' })
-  @ApiUnauthorizedResponse({
-    description: 'Wrong credentials or expired/invalid Jwt token',
-  })
+  @ApiCreatedResponse({ description: 'Confirm the user login' })
+  @ApiUnauthorizedResponse({ description: 'Wrong credentials' })
+  // swagger
   @Post('/signin')
   signIn(
     @Body() signInCredentials: SignInCredentialsDto,
