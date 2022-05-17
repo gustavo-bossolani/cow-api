@@ -3,6 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+import { StatementModule } from './statement/statement.module';
+import { OverviewModule } from './overview/overview.module';
+import { CategoryModule } from 'src/category/category.module';
+import { AuthModule } from './auth/auth.module';
+
 import { TransformInterceptor } from './transform.interceptor';
 
 async function bootstrap() {
@@ -16,7 +21,9 @@ async function bootstrap() {
     .addTag('money')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    include: [AuthModule, CategoryModule, OverviewModule, StatementModule],
+  });
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe());
