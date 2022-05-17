@@ -14,7 +14,10 @@ import {
   ApiBearerAuth,
   ApiHeader,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOperation,
+  ApiParam,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -47,6 +50,7 @@ export class CategoryController {
     description: 'When a category defined by name already exists',
   })
   @ApiBadRequestResponse({ description: 'If name is not provided' })
+  @ApiResponse({ status: 201, description: 'Category created' })
   // swagger
   @Post()
   createCategory(
@@ -56,6 +60,13 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto, user);
   }
 
+  @ApiOperation({ summary: 'Search category by name or id' })
+  @ApiNotFoundResponse({ description: 'When category is not found' })
+  @ApiResponse({
+    description: 'Found category',
+    type: Category,
+    status: 200,
+  })
   //swagger
   @Get('/by')
   getCategory(
@@ -65,6 +76,10 @@ export class CategoryController {
     return this.categoryService.getBy(filter, user);
   }
 
+  @ApiOperation({ summary: 'Return all categories with pagination' })
+  @ApiBadRequestResponse({ description: 'If page or limit is not defined' })
+  @ApiResponse({ type: Page, description: 'Pagination of type T', status: 200 })
+  //swagger
   @Get()
   getAll(
     @GetUser() user: User,
@@ -73,6 +88,14 @@ export class CategoryController {
     return this.categoryService.getCategories(user, options);
   }
 
+  @ApiOperation({ summary: 'Deletes selected category' })
+  @ApiNotFoundResponse({ description: 'When category is not found' })
+  @ApiResponse({
+    description: 'Confirm the deletion of a category',
+    status: 204,
+  })
+  @ApiParam({ name: 'id' })
+  // swagger
   @Delete('/:id')
   @HttpCode(204)
   async delete(@Param('id') id: string, @GetUser() user: User): Promise<void> {
