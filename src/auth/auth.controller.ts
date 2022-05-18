@@ -1,9 +1,5 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
-import { AuthService } from './auth.service';
-
-import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
-import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -15,34 +11,44 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { SigninTokenResponseDto } from './dto/signin-token-response.dto';
+import {
+  apiBadRequestResponseForSignUpMethod,
+  apiConflictResponseForSignUpMethod,
+  apiCreatedResponseForSignUpMethod,
+  apiInternalServerErrorResponse,
+  ApiOperationForSignInMethod,
+  apiOperationForSignUpMethod,
+  apiResponseForSignInMethod,
+  apiTag,
+  apiUnauthorizedResponseForSignInMethod,
+} from './config/swagger/swagger.config';
 
-@ApiTags('Auth')
-@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+import { AuthService } from './auth.service';
+
+import { SigninTokenResponseDto } from './dto/signin-token-response.dto';
+import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
+import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
+
+@ApiTags(apiTag)
+@ApiInternalServerErrorResponse(apiInternalServerErrorResponse)
 //swagger
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @ApiOperation({ summary: 'Signup user' })
-  @ApiCreatedResponse({ description: 'Confirm user creation' })
-  @ApiConflictResponse({ description: 'When username is repeated' })
-  @ApiBadRequestResponse({
-    description: 'When username is out of range and/or  haves spaces',
-  })
+  @ApiOperation(apiOperationForSignUpMethod)
+  @ApiCreatedResponse(apiCreatedResponseForSignUpMethod)
+  @ApiConflictResponse(apiConflictResponseForSignUpMethod)
+  @ApiBadRequestResponse(apiBadRequestResponseForSignUpMethod)
   // swagger
   @Post('/signup')
   signUp(@Body() signUpCredentials: SignUpCredentialsDto): Promise<void> {
     return this.authService.signUp(signUpCredentials);
   }
 
-  @ApiOperation({ summary: 'Signin user' })
-  @ApiUnauthorizedResponse({ description: 'Wrong credentials' })
-  @ApiResponse({
-    description: 'A token for session control',
-    type: SigninTokenResponseDto,
-    status: 201,
-  })
+  @ApiOperation(ApiOperationForSignInMethod)
+  @ApiUnauthorizedResponse(apiUnauthorizedResponseForSignInMethod)
+  @ApiResponse(apiResponseForSignInMethod)
   // swagger
   @Post('/signin')
   signIn(
