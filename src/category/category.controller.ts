@@ -22,6 +22,25 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import {
+  apiBadRequestResponseForCreateCategory,
+  apiBadRequestResponseForGetAll,
+  apiHeader,
+  apiInternalServerErrorResponseForController,
+  apiNotFoundResponseForDelete,
+  apiNotFoundResponseForGetCategory,
+  apiOperationForCreateCategory,
+  apiOperationForDelete,
+  apiOperationForGetAll,
+  apiOperationForGetCategory,
+  apiResponseForCreateCategory,
+  apiResponseForDelete,
+  apiResponseForGetAll,
+  apiResponseForGetCategory,
+  apiTags,
+  apiUnauthorizedResponseForCreateCategory,
+} from './config/swagger/swagger.config';
+
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CategoryService } from './category.service';
@@ -35,22 +54,20 @@ import { Page } from 'src/shared/components/pagination/page.model';
 import { User } from 'src/user/entity/user.entity';
 import { Category } from './entity/category.entity';
 
-@ApiTags('Category')
+@ApiTags(apiTags)
 @ApiBearerAuth()
-@ApiHeader({ name: 'Authorization', example: 'Bearer token' })
-@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+@ApiHeader(apiHeader)
+@ApiInternalServerErrorResponse(apiInternalServerErrorResponseForController)
 //swagger
 @Controller('category')
 @UseGuards(SessionAuthGuard)
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'Create category for a user.' })
-  @ApiUnauthorizedResponse({
-    description: 'When a category defined by name already exists',
-  })
-  @ApiBadRequestResponse({ description: 'If name is not provided' })
-  @ApiResponse({ status: 201, description: 'Category created' })
+  @ApiOperation(apiOperationForCreateCategory)
+  @ApiUnauthorizedResponse(apiUnauthorizedResponseForCreateCategory)
+  @ApiBadRequestResponse(apiBadRequestResponseForCreateCategory)
+  @ApiResponse(apiResponseForCreateCategory)
   // swagger
   @Post()
   createCategory(
@@ -60,13 +77,9 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto, user);
   }
 
-  @ApiOperation({ summary: 'Search category by name or id' })
-  @ApiNotFoundResponse({ description: 'When category is not found' })
-  @ApiResponse({
-    description: 'Found category',
-    type: Category,
-    status: 200,
-  })
+  @ApiOperation(apiOperationForGetCategory)
+  @ApiNotFoundResponse(apiNotFoundResponseForGetCategory)
+  @ApiResponse(apiResponseForGetCategory)
   //swagger
   @Get('/by')
   getCategory(
@@ -76,9 +89,9 @@ export class CategoryController {
     return this.categoryService.getBy(filter, user);
   }
 
-  @ApiOperation({ summary: 'Return all categories with pagination' })
-  @ApiBadRequestResponse({ description: 'If page or limit is not defined' })
-  @ApiResponse({ type: Page, description: 'Pagination of type T', status: 200 })
+  @ApiOperation(apiOperationForGetAll)
+  @ApiBadRequestResponse(apiBadRequestResponseForGetAll)
+  @ApiResponse(apiResponseForGetAll)
   //swagger
   @Get()
   getAll(
@@ -88,12 +101,9 @@ export class CategoryController {
     return this.categoryService.getCategories(user, options);
   }
 
-  @ApiOperation({ summary: 'Deletes selected category' })
-  @ApiNotFoundResponse({ description: 'When category is not found' })
-  @ApiResponse({
-    description: 'Confirm the deletion of a category',
-    status: 204,
-  })
+  @ApiOperation(apiOperationForDelete)
+  @ApiNotFoundResponse(apiNotFoundResponseForDelete)
+  @ApiResponse(apiResponseForDelete)
   @ApiParam({ name: 'id' })
   // swagger
   @Delete('/:id')
