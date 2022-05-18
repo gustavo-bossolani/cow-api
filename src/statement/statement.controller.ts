@@ -10,9 +10,39 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiHeader,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
-import { CreateStatementDto } from './dtos/create-statement.dto';
-import { UpdateStatementDto } from './dtos/update-statement.dto';
+import {
+  apiBadRequestResponseForCreateStatement,
+  apiBadRequestResponseForGetAll,
+  apiBadRequestResponseForUpdateStatement,
+  apiHeaderForStatementController,
+  apiInternalServerErrorResponseForStatementController,
+  apiNotFoundResponseForCreateStatement,
+  apiNotFoundResponseForDeleteStatement,
+  apiNotFoundResponseForUpdateStatement,
+  apiOperationForCreateStatement,
+  apiOperationForDeleteStatement,
+  apiOperationForGetAll,
+  apiOperationForUpdateStatement,
+  apiParamForDeleteStatement,
+  apiParamForUpdateStatement,
+  apiResponseForCreateStatement,
+  apiResponseForDeleteStatement,
+  apiResponseForGetAll,
+  apiResponseForUpdateStatement,
+  apiTagsForStatementController,
+} from './config/swagger/swagger.config';
 
 import { StatementService } from './statement.service';
 
@@ -21,14 +51,31 @@ import { ParseToNumber } from 'src/shared/pipes/parse-to-number/parse-to-number.
 import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
-import { User } from 'src/user/entity/user.entity';
+import { CreateStatementDto } from './dtos/create-statement.dto';
+import { UpdateStatementDto } from './dtos/update-statement.dto';
 import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 
+import { User } from 'src/user/entity/user.entity';
+import { Statement } from './entities/statement.entity';
+import { Page } from 'src/shared/components/pagination/page.model';
+
+@ApiTags(apiTagsForStatementController)
+@ApiBearerAuth()
+@ApiHeader(apiHeaderForStatementController)
+@ApiInternalServerErrorResponse(
+  apiInternalServerErrorResponseForStatementController,
+)
+//swagger
 @Controller('statement')
 @UseGuards(SessionAuthGuard)
 export class StatementController {
   constructor(private statementService: StatementService) {}
 
+  @ApiOperation(apiOperationForCreateStatement)
+  @ApiBadRequestResponse(apiBadRequestResponseForCreateStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForCreateStatement)
+  @ApiResponse(apiResponseForCreateStatement)
+  // swagger
   @Post()
   @HttpCode(201)
   createStatement(
@@ -38,14 +85,23 @@ export class StatementController {
     return this.statementService.createStatement(createStatementDto, user);
   }
 
+  @ApiOperation(apiOperationForGetAll)
+  @ApiBadRequestResponse(apiBadRequestResponseForGetAll)
+  @ApiResponse(apiResponseForGetAll)
+  // swagger
   @Get()
   getAllStatements(
     @GetUser() user: User,
     @Query(ParseToNumber) options: PaginatorOptionsDto,
-  ) {
+  ): Promise<Page<Statement>> {
     return this.statementService.getAllStatements(user, options);
   }
 
+  @ApiOperation(apiOperationForDeleteStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForDeleteStatement)
+  @ApiParam(apiParamForDeleteStatement)
+  @ApiResponse(apiResponseForDeleteStatement)
+  // swagger
   @Delete('/:id')
   @HttpCode(204)
   deleteStatemetnById(
@@ -55,6 +111,12 @@ export class StatementController {
     return this.statementService.deleteStatementById(id, user);
   }
 
+  @ApiOperation(apiOperationForUpdateStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForUpdateStatement)
+  @ApiBadRequestResponse(apiBadRequestResponseForUpdateStatement)
+  @ApiParam(apiParamForUpdateStatement)
+  @ApiResponse(apiResponseForUpdateStatement)
+  // swagger
   @Patch('/:id')
   @HttpCode(204)
   updateStatement(
