@@ -1,5 +1,12 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiInternalServerErrorResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
 import { ParseToNumber } from 'src/shared/pipes/parse-to-number/parse-to-number.decorator';
 import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
@@ -10,6 +17,11 @@ import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-
 
 import { User } from 'src/user/entity/user.entity';
 
+@ApiTags('Overview')
+@ApiBearerAuth()
+@ApiHeader({ name: 'Authorization', example: 'Bearer token' })
+@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+//swagger
 @Controller('overview')
 @UseGuards(SessionAuthGuard)
 export class OverviewController {
