@@ -100,7 +100,7 @@ export class StatementService {
   private async findCategory(id: string) {
     let category: Category;
     if (id) {
-      category = await this.categoryRepository.findOne({ id: id });
+      category = await this.categoryRepository.findOne({ id });
 
       if (!category) {
         throw new NotFoundException(
