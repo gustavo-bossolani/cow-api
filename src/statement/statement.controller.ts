@@ -22,8 +22,27 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { CreateStatementDto } from './dtos/create-statement.dto';
-import { UpdateStatementDto } from './dtos/update-statement.dto';
+import {
+  apiBadRequestResponseForCreateStatement,
+  apiBadRequestResponseForGetAll,
+  apiBadRequestResponseForUpdateStatement,
+  apiHeaderForStatementController,
+  apiInternalServerErrorResponseForStatementController,
+  apiNotFoundResponseForCreateStatement,
+  apiNotFoundResponseForDeleteStatement,
+  apiNotFoundResponseForUpdateStatement,
+  apiOperationForCreateStatement,
+  apiOperationForDeleteStatement,
+  apiOperationForGetAll,
+  apiOperationForUpdateStatement,
+  apiParamForDeleteStatement,
+  apiParamForUpdateStatement,
+  apiResponseForCreateStatement,
+  apiResponseForDeleteStatement,
+  apiResponseForGetAll,
+  apiResponseForUpdateStatement,
+  apiTagsForStatementController,
+} from './config/swagger/swagger.config';
 
 import { StatementService } from './statement.service';
 
@@ -32,30 +51,30 @@ import { ParseToNumber } from 'src/shared/pipes/parse-to-number/parse-to-number.
 import { SessionAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
-import { User } from 'src/user/entity/user.entity';
+import { CreateStatementDto } from './dtos/create-statement.dto';
+import { UpdateStatementDto } from './dtos/update-statement.dto';
 import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
+
+import { User } from 'src/user/entity/user.entity';
 import { Statement } from './entities/statement.entity';
 import { Page } from 'src/shared/components/pagination/page.model';
 
-@ApiTags('Statement')
+@ApiTags(apiTagsForStatementController)
 @ApiBearerAuth()
-@ApiHeader({ name: 'Authorization', example: 'Bearer token' })
-@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+@ApiHeader(apiHeaderForStatementController)
+@ApiInternalServerErrorResponse(
+  apiInternalServerErrorResponseForStatementController,
+)
 //swagger
 @Controller('statement')
 @UseGuards(SessionAuthGuard)
 export class StatementController {
   constructor(private statementService: StatementService) {}
 
-  @ApiOperation({ summary: 'Create statement for a user.' })
-  @ApiBadRequestResponse({
-    description: 'If CreateStatementDto rules is not respected',
-  })
-  @ApiNotFoundResponse({
-    description:
-      'Return only if a category id is passed, when it is the system will try to find a category with provided id',
-  })
-  @ApiResponse({ status: 201, description: 'Statement created' })
+  @ApiOperation(apiOperationForCreateStatement)
+  @ApiBadRequestResponse(apiBadRequestResponseForCreateStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForCreateStatement)
+  @ApiResponse(apiResponseForCreateStatement)
   // swagger
   @Post()
   @HttpCode(201)
@@ -66,11 +85,9 @@ export class StatementController {
     return this.statementService.createStatement(createStatementDto, user);
   }
 
-  @ApiOperation({ summary: 'Recover all statements with paginator' })
-  @ApiBadRequestResponse({
-    description: 'If PaginatorOptionsDto rules is not respected',
-  })
-  @ApiResponse({ status: 200, description: 'Statement created', type: Page })
+  @ApiOperation(apiOperationForGetAll)
+  @ApiBadRequestResponse(apiBadRequestResponseForGetAll)
+  @ApiResponse(apiResponseForGetAll)
   // swagger
   @Get()
   getAllStatements(
@@ -80,12 +97,10 @@ export class StatementController {
     return this.statementService.getAllStatements(user, options);
   }
 
-  @ApiOperation({ summary: 'Delete a statement for a given id' })
-  @ApiNotFoundResponse({
-    description: 'When statement is not found for the given id',
-  })
-  @ApiParam({ name: 'id', example: 'fa817897-ec03-4cb3-abb2-b02aba60cc0e' })
-  @ApiResponse({ status: 204, description: 'Statement deleted' })
+  @ApiOperation(apiOperationForDeleteStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForDeleteStatement)
+  @ApiParam(apiParamForDeleteStatement)
+  @ApiResponse(apiResponseForDeleteStatement)
   // swagger
   @Delete('/:id')
   @HttpCode(204)
@@ -96,15 +111,11 @@ export class StatementController {
     return this.statementService.deleteStatementById(id, user);
   }
 
-  @ApiOperation({ summary: 'Update a statement for a given id' })
-  @ApiNotFoundResponse({
-    description: 'When statement is not found for the given id',
-  })
-  @ApiBadRequestResponse({
-    description: 'If UpdateStatementDto rules is not respected',
-  })
-  @ApiParam({ name: 'id', example: 'fa817897-ec03-4cb3-abb2-b02aba60cc0e' })
-  @ApiResponse({ status: 204, description: 'Statement deleted' })
+  @ApiOperation(apiOperationForUpdateStatement)
+  @ApiNotFoundResponse(apiNotFoundResponseForUpdateStatement)
+  @ApiBadRequestResponse(apiBadRequestResponseForUpdateStatement)
+  @ApiParam(apiParamForUpdateStatement)
+  @ApiResponse(apiResponseForUpdateStatement)
   // swagger
   @Patch('/:id')
   @HttpCode(204)
