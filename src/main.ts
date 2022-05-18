@@ -18,7 +18,6 @@ async function bootstrap() {
     .setTitle('Cow api')
     .setDescription('The system to control your money')
     .setVersion('1.0')
-    .addTag('money')
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
