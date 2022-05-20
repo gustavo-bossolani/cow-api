@@ -26,6 +26,9 @@ class Statement {
   @Column()
   finishDate: string;
 
+  @Column({ type: 'date' })
+  startDate: string;
+
   @CreateDateColumn({ type: 'date' })
   createdAt: string;
 

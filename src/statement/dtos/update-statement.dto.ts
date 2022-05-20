@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 class UpdateStatementDto {
   @ApiProperty({ example: 'Cellphone', required: false })
+  @IsOptional()
   @IsString()
   title?: string;
 
   @ApiProperty({ example: 'For work (Hypercard)', required: false })
+  @IsOptional()
   @IsString()
   description?: string;
 
@@ -15,14 +17,24 @@ class UpdateStatementDto {
     example: 2,
     required: false,
   })
+  @IsOptional()
   @IsNumber()
   installment?: number;
+
+  @ApiProperty({
+    example: '2020-01-14',
+    description: 'The date that you bought',
+  })
+  @IsOptional()
+  @IsString()
+  startDate?: string;
 
   @ApiProperty({
     description: 'The amount of purchase',
     example: 500,
     required: false,
   })
+  @IsOptional()
   @IsNumber()
   amount?: number;
 
@@ -31,6 +43,7 @@ class UpdateStatementDto {
     description: 'Category id',
     required: false,
   })
+  @IsOptional()
   @IsString()
   @IsUUID()
   categoryId?: string;

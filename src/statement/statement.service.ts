@@ -80,21 +80,16 @@ export class StatementService {
     id: string,
     user: User,
   ): Promise<void> {
+    const { categoryId } = updateStatementDto;
+
     const statement = await this.findStatemetById(id, user);
-
-    const { installment, categoryId } = updateStatementDto;
-
     const category: Category = await this.findCategory(categoryId);
 
-    Object.assign(statement, {
-      ...updateStatementDto,
-      finishDate: installment
-        ? increaseMonth(installment)
-        : statement.finishDate,
+    return this.statementRepository.updateStatement(
+      updateStatementDto,
+      statement,
       category,
-    });
-
-    await this.statementRepository.save(statement);
+    );
   }
 
   private async findCategory(id: string) {

@@ -4,6 +4,7 @@ import { increaseMonth } from 'src/shared/util/increase-month-date';
 
 import { CreateStatementDto } from '../dtos/create-statement.dto';
 import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
+import { UpdateStatementDto } from '../dtos/update-statement.dto';
 import { CountStatementByCategory } from 'src/overview/models/count-statement-by-category.model';
 import { CountStatementWithInstallment } from 'src/overview/models/count-statement-with-installment.model';
 import { CountStatementPerCategory } from 'src/overview/models/count-statement-per-category.model';
@@ -21,12 +22,14 @@ class StatementRepository extends Repository<Statement> {
     category: Category,
     user: User,
   ): Promise<Statement> {
-    const { description, installment, title, amount } = createStatementDto;
+    const { description, installment, startDate, title, amount } =
+      createStatementDto;
 
     const statement = this.create({
       description,
-      finishDate: increaseMonth(installment),
+      finishDate: increaseMonth(startDate, installment),
       installment,
+      startDate,
       title,
       amount,
       user,
@@ -36,6 +39,44 @@ class StatementRepository extends Repository<Statement> {
     await this.save(statement);
 
     return statement;
+  }
+
+  async updateStatement(
+    updateStatementDto: UpdateStatementDto,
+    statement: Statement,
+    category: Category,
+  ): Promise<void> {
+    const { installment, startDate } = updateStatementDto;
+    const { installment: dbStatement, startDate: dbStartDate } = statement;
+
+    Object.assign(statement, { ...updateStatementDto, category });
+
+    if (installment && startDate) {
+      Object.assign(statement, {
+        ...statement,
+        finishDate: increaseMonth(startDate, installment),
+        startDate,
+        installment,
+      });
+    }
+
+    if (installment && !startDate) {
+      Object.assign(statement, {
+        ...statement,
+        finishDate: increaseMonth(dbStartDate, installment),
+        installment,
+      });
+    }
+
+    if (!installment && startDate) {
+      Object.assign(statement, {
+        ...statement,
+        finishDate: increaseMonth(startDate, dbStatement),
+        startDate,
+      });
+    }
+
+    await this.save(statement);
   }
 
   async countAllFutureStatementsPerCategory(

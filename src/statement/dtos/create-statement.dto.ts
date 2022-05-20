@@ -16,6 +16,13 @@ class CreateStatementDto {
   @IsDefined()
   installment: number;
 
+  @ApiProperty({
+    example: '2020-01-14',
+    description: 'The date that you bought',
+  })
+  @IsDefined()
+  startDate: string;
+
   @ApiProperty({ example: 500, description: 'The amount of purchase' })
   @IsDefined()
   amount: number;
