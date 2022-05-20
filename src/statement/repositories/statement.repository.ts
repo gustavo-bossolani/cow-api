@@ -46,11 +46,11 @@ class StatementRepository extends Repository<Statement> {
         'CAST(COUNT(category.name) AS DOUBLE PRECISION) as total, category.name as category',
       )
       .innerJoin('category', 'category', 'category.id = statement.categoryId')
-      .where(
-        'EXTRACT(MONTH FROM "statement"."finishDate"::date) >= EXTRACT(MONTH FROM CURRENT_DATE::date)',
-      )
-      .orWhere(
-        'EXTRACT(YEAR FROM "statement"."finishDate"::date) > EXTRACT(YEAR FROM CURRENT_DATE::date)',
+      .andWhere(
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        EXTRACT(MONTH FROM CURRENT_DATE:: date) + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
+        `,
       )
       .andWhere({ user })
       .groupBy('category.name');
@@ -67,10 +67,10 @@ class StatementRepository extends Repository<Statement> {
       )
       .where('statement.installment > 0')
       .andWhere(
-        'EXTRACT(MONTH FROM "statement"."finishDate"::date) >= EXTRACT(MONTH FROM CURRENT_DATE::date)',
-      )
-      .orWhere(
-        'EXTRACT(YEAR FROM "statement"."finishDate"::date) > EXTRACT(YEAR FROM CURRENT_DATE::date)',
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        EXTRACT(MONTH FROM CURRENT_DATE:: date) + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
+        `,
       )
       .andWhere({ user });
 
