@@ -80,6 +80,7 @@ class StatementRepository extends Repository<Statement> {
   async countStatementsPerCategory(
     user: User,
     month: number,
+    year: number,
   ): Promise<CountStatementByCategory[]> {
     const statementQuery = this.createQueryBuilder('statement')
       .select(
@@ -89,7 +90,7 @@ class StatementRepository extends Repository<Statement> {
       .where({ user })
       .andWhere(
         `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
         ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0
         `,
       )
@@ -101,6 +102,7 @@ class StatementRepository extends Repository<Statement> {
   async countStatementsAndAmountIfHasInstallment(
     user: User,
     month: number,
+    year: number,
   ): Promise<CountStatementWithInstallment[]> {
     const statementQuery = await this.createQueryBuilder('statement')
       .select(
@@ -109,7 +111,7 @@ class StatementRepository extends Repository<Statement> {
       .where('statement.installment > 0')
       .andWhere(
         `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
         ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
         `,
       )
@@ -129,6 +131,7 @@ class StatementRepository extends Repository<Statement> {
 
   async getStatementsPerMonth(
     month: number,
+    year: number,
     user: User,
     options: PaginatorOptionsDto,
   ): Promise<Page<Statement>> {
@@ -140,7 +143,7 @@ class StatementRepository extends Repository<Statement> {
       .select('COUNT()')
       .where(
         `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) - 
         ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0`,
       )
       .andWhere({ user });
@@ -151,14 +154,14 @@ class StatementRepository extends Repository<Statement> {
       .select(
         `
           *,
-          (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+          (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
           ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) AS "installments"
         `,
       )
       .where({ user })
       .andWhere(
         `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
         ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0 LIMIT ${limit} OFFSET ${skip}`,
       );
 

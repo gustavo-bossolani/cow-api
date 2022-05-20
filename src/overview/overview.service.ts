@@ -28,11 +28,13 @@ export class OverviewService {
 
   async getStatementsOverviewMonthly(
     month: number,
+    year: number,
     user: User,
     options: PaginatorOptionsDto,
   ) {
     const paginator = (await this.statementRepository.getStatementsPerMonth(
       month,
+      year,
       user,
       options,
     )) as any;
@@ -41,10 +43,11 @@ export class OverviewService {
 
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
-        this.statementRepository.countStatementsPerCategory(user, month),
+        this.statementRepository.countStatementsPerCategory(user, month, year),
         this.statementRepository.countStatementsAndAmountIfHasInstallment(
           user,
           month,
+          year,
         ),
       ]);
 

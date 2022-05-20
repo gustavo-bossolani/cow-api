@@ -32,12 +32,18 @@ export class OverviewController {
     return this.service.getStatementsOverViewAll(user);
   }
 
-  @Get('/monthly/:month')
+  @Get('/monthly/:month/:year')
   getStatementsOverviewMonthly(
     @GetUser() user: User,
     @Query(ParseToNumber) options: PaginatorOptionsDto,
     @Param('month') month: number,
+    @Param('year') year: number,
   ) {
-    return this.service.getStatementsOverviewMonthly(month, user, options);
+    return this.service.getStatementsOverviewMonthly(
+      month,
+      year,
+      user,
+      options,
+    );
   }
 }
