@@ -77,7 +77,6 @@ class StatementRepository extends Repository<Statement> {
     return await statementQuery.getRawMany();
   }
 
-  // TODO ajustar filtragem por categoria mensal
   async countStatementsPerCategory(
     user: User,
     month: number,
@@ -88,9 +87,12 @@ class StatementRepository extends Repository<Statement> {
       )
       .innerJoin('category', 'category', 'category.id = statement.categoryId')
       .where({ user })
-      .andWhere('EXTRACT(MONTH FROM "statement"."finishDate"::date) = :month', {
-        month,
-      })
+      .andWhere(
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0
+        `,
+      )
       .groupBy('category.name');
 
     return await statementQuery.getRawMany();
@@ -105,10 +107,13 @@ class StatementRepository extends Repository<Statement> {
         'COUNT(installment)::INTEGER as statements, CAST(SUM(amount) AS DOUBLE PRECISION) as amount',
       )
       .where('statement.installment > 0')
-      .andWhere({ user })
-      .andWhere('EXTRACT(MONTH FROM "statement"."finishDate"::date) = :month', {
-        month,
-      });
+      .andWhere(
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
+        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
+        `,
+      )
+      .andWhere({ user });
 
     let response = await statementQuery.getRawMany();
 
