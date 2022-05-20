@@ -77,6 +77,7 @@ class StatementRepository extends Repository<Statement> {
     return await statementQuery.getRawMany();
   }
 
+  // TODO ajustar filtragem por categoria mensal
   async countStatementsPerCategory(
     user: User,
     month: number,
@@ -131,20 +132,29 @@ class StatementRepository extends Repository<Statement> {
     const skip = Paginator.calculateOffset(page, limit);
 
     const statementQueryForTotal = await this.createQueryBuilder('statement')
-      .select('COUNT("statement"."userId")')
-      .where('EXTRACT(MONTH FROM "statement"."finishDate"::date) = :month', {
-        month,
-      })
+      .select('COUNT()')
+      .where(
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0`,
+      )
       .andWhere({ user });
 
     const statementQueryForStatementsPerMonth = await this.createQueryBuilder(
       'statement',
     )
-      .select('*, CAST(statement.amount AS DOUBLE PRECISION)')
+      .select(
+        `
+          *,
+          (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+          ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) AS "installments"
+        `,
+      )
       .where({ user })
       .andWhere(
-        'EXTRACT(MONTH FROM "statement"."finishDate"::date) = :month LIMIT :limit OFFSET :skip',
-        { month, limit, skip },
+        `
+        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) - 
+        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0 LIMIT ${limit} OFFSET ${skip}`,
       );
 
     const [total, results] = await Promise.all([

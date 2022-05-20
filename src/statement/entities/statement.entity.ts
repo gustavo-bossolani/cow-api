@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 
 import { Category } from 'src/category/entity/category.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -19,6 +25,9 @@ class Statement {
 
   @Column()
   finishDate: string;
+
+  @CreateDateColumn({ type: 'date' })
+  createdAt: string;
 
   @Column({ type: 'decimal', scale: 2 })
   amount: number;
