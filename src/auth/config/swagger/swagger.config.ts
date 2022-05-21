@@ -35,6 +35,19 @@ const apiResponseForSignInMethod: ApiResponseOptions = {
   status: 201,
 };
 
+// change password
+const ApiOperationForChangePasswordMethod: ApiOperationOptions = {
+  summary: 'Change user password',
+};
+const ApiUnauthorizedResponseForChangePasswordMethod: ApiResponseOptions = {
+  description: 'If any of the user credentials are incorrect',
+  status: 401,
+};
+const apiResponseForChangePasswordMethod: ApiResponseOptions = {
+  status: 204,
+  description: 'Confirms that the update was successfu',
+};
+
 export {
   //controller
   apiTag,
@@ -48,4 +61,8 @@ export {
   ApiOperationForSignInMethod,
   apiUnauthorizedResponseForSignInMethod,
   apiResponseForSignInMethod,
+  // change password
+  ApiOperationForChangePasswordMethod,
+  ApiUnauthorizedResponseForChangePasswordMethod,
+  apiResponseForChangePasswordMethod,
 };

@@ -5,6 +5,8 @@ import { UserService } from './../user/user.service';
 
 import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
+import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,5 +27,9 @@ export class AuthService {
 
     const access = await this.jwtService.sign({ username });
     return { access };
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
+    return this.userService.changePassword(changePasswordDto);
   }
 }

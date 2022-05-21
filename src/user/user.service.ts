@@ -9,6 +9,7 @@ import { SignInCredentialsDto } from './dto/sign-in-credentials.dto';
 import { User } from './entity/user.entity';
 
 import { UserRepository } from './repositories/user.repository';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,23 @@ export class UserService {
 
   async createUser(signUpCredentials: SignUpCredentialsDto): Promise<void> {
     return await this.userRepository.createUser(signUpCredentials);
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
+    const { newPassord, secret, username } = changePasswordDto;
+
+    const user = await this.userRepository.findOne({ username });
+
+    if (user && (await bcrypt.compare(secret, user.secret))) {
+      const passwordSalt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(newPassord, passwordSalt);
+
+      Object.assign(user, { ...user, password: hashedPassword });
+
+      await this.userRepository.save(user);
+    } else {
+      throw new UnauthorizedException('Check your credentials.');
+    }
   }
 
   async verifyUserCredentials(

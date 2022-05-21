@@ -13,14 +13,18 @@ import { User } from 'src/user/entity/user.entity';
 @EntityRepository(User)
 class UserRepository extends Repository<User> {
   async createUser(signUpCredentials: SignUpCredentialsDto) {
-    const { name, password, username } = signUpCredentials;
+    const { name, password, username, secret } = signUpCredentials;
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const passwordSalt = await bcrypt.genSalt();
+    const secretSalt = await bcrypt.genSalt();
+
+    const hashedPassword = await bcrypt.hash(password, passwordSalt);
+    const hashedSecret = await bcrypt.hash(secret, secretSalt);
 
     const user = this.create({
       name,
       password: hashedPassword,
+      secret: hashedSecret,
       username,
     });
 

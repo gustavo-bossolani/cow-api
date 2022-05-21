@@ -24,5 +24,8 @@ class SignUpCredentialsDto {
 
   @ApiProperty({ example: 'flower123' })
   password: string;
+
+  @ApiProperty({ example: 'TopSecret51' })
+  secret: string;
 }
 export { SignUpCredentialsDto };

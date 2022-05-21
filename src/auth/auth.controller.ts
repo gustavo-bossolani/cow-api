@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Put } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
@@ -16,10 +16,13 @@ import {
   apiConflictResponseForSignUpMethod,
   apiCreatedResponseForSignUpMethod,
   apiInternalServerErrorResponse,
+  ApiOperationForChangePasswordMethod,
   ApiOperationForSignInMethod,
   apiOperationForSignUpMethod,
+  apiResponseForChangePasswordMethod,
   apiResponseForSignInMethod,
   apiTag,
+  ApiUnauthorizedResponseForChangePasswordMethod,
   apiUnauthorizedResponseForSignInMethod,
 } from './config/swagger/swagger.config';
 
@@ -28,6 +31,7 @@ import { AuthService } from './auth.service';
 import { SigninTokenResponseDto } from './dto/signin-token-response.dto';
 import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
 import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
+import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
 
 @ApiTags(apiTag)
 @ApiInternalServerErrorResponse(apiInternalServerErrorResponse)
@@ -55,5 +59,15 @@ export class AuthController {
     @Body() signInCredentials: SignInCredentialsDto,
   ): Promise<SigninTokenResponseDto> {
     return this.authService.signIn(signInCredentials);
+  }
+
+  @ApiOperation(ApiOperationForChangePasswordMethod)
+  @ApiUnauthorizedResponse(ApiUnauthorizedResponseForChangePasswordMethod)
+  @ApiResponse(apiResponseForChangePasswordMethod)
+  // swagger
+  @Put('/change-password')
+  @HttpCode(204)
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    return this.authService.changePassword(changePasswordDto);
   }
 }
