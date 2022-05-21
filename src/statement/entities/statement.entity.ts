@@ -26,7 +26,7 @@ class Statement {
   @Column()
   finishDate: string;
 
-  @Column({ type: 'date' })
+  @Column()
   startDate: string;
 
   @CreateDateColumn({ type: 'date' })

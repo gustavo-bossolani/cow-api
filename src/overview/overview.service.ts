@@ -6,6 +6,9 @@ import { StatementRepository } from 'src/statement/repositories/statement.reposi
 import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 
 import { User } from 'src/user/entity/user.entity';
+import { Statement } from 'src/statement/entities/statement.entity';
+import { OverviewAllDto } from './dto/overview-all.dto';
+import { OverviewMonthlyDto } from './dto/overview-monthly.dto';
 
 @Injectable()
 export class OverviewService {
@@ -14,7 +17,7 @@ export class OverviewService {
     private statementRepository: StatementRepository,
   ) {}
 
-  async getStatementsOverViewAll(user: User) {
+  async getStatementsOverviewAll(user: User): Promise<OverviewAllDto> {
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
         this.statementRepository.countAllFutureStatementsPerCategory(user),
@@ -31,7 +34,7 @@ export class OverviewService {
     year: number,
     user: User,
     options: PaginatorOptionsDto,
-  ) {
+  ): Promise<OverviewMonthlyDto<Statement>> {
     const paginator = (await this.statementRepository.getStatementsPerMonth(
       month,
       year,
@@ -39,7 +42,13 @@ export class OverviewService {
       options,
     )) as any;
 
-    paginator.results.map((result) => delete result.userId);
+    paginator.results.map((result) => {
+      delete result.userId;
+      result.createdAt = result.createdAt.toISOString().split('T')[0];
+      console.log(result);
+
+      return result;
+    });
 
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
