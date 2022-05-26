@@ -43,10 +43,11 @@ export class OverviewService {
     )) as any;
 
     paginator.results.map((result) => {
-      delete result.userId;
+      result['remainingInstallments'] = result['installments'];
       result.createdAt = result.createdAt.toISOString().split('T')[0];
-      console.log(result);
 
+      delete result.installments;
+      delete result.userId;
       return result;
     });
 
