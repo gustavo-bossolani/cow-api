@@ -29,9 +29,6 @@ class Statement {
   @Column()
   startDate: string;
 
-  @CreateDateColumn({ type: 'date' })
-  createdAt: string;
-
   @Column({ type: 'decimal', scale: 2 })
   amount: number;
 

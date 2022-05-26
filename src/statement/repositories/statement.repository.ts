@@ -195,6 +195,7 @@ class StatementRepository extends Repository<Statement> {
       .select(
         `
           *,
+          CAST("statement"."amount"AS DOUBLE PRECISION),
           (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
           ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) AS "installments"
         `,

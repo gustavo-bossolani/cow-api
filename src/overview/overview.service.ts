@@ -43,8 +43,14 @@ export class OverviewService {
     )) as any;
 
     paginator.results.map((result) => {
+      // create installment amount
+      if (result.installment > 0) {
+        result['installmentAmount'] = result.amount / result.installment;
+      } else {
+        result['installmentAmount'] = result.amount;
+      }
+
       result['remainingInstallments'] = result['installments'];
-      result.createdAt = result.createdAt.toISOString().split('T')[0];
 
       delete result.installments;
       delete result.userId;
