@@ -52,13 +52,25 @@ export class OverviewService {
 
       result['remainingInstallments'] = result['installments'];
 
+      // create category object
+      const { name, color, categoryId } = result;
+      result.category = {
+        id: categoryId,
+        name,
+        color,
+      };
+
+      delete result.name;
+      delete result.color;
+      delete result.categoryId;
       delete result.installments;
       delete result.userId;
       return result;
     });
 
-    const [statementsPerCategory, statementsWithInstallment] =
+    const [monthlyAmount, statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
+        this.statementRepository.countTotalMonthAmount(user, month, year),
         this.statementRepository.countStatementsPerCategory(user, month, year),
         this.statementRepository.countStatementsAndAmountIfHasInstallment(
           user,
@@ -68,6 +80,7 @@ export class OverviewService {
       ]);
 
     return {
+      monthlyAmount,
       paginator,
       statementsPerCategory,
       statementsWithInstallment,

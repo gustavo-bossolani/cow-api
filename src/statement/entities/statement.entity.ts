@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 import { Category } from 'src/category/entity/category.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -37,6 +31,8 @@ class Statement {
 
   @ManyToOne((_type) => Category, (category) => category.statement, {
     nullable: true,
+    eager: true,
+    lazy: false,
   })
   category?: Category;
 }

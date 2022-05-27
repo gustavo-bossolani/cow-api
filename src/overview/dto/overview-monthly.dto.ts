@@ -7,6 +7,9 @@ import { Page } from 'src/shared/components/pagination/page.model';
 
 class OverviewMonthlyDto<T> {
   @ApiProperty()
+  monthlyAmount: number;
+
+  @ApiProperty()
   paginator: Page<T>;
 
   @ApiProperty({
