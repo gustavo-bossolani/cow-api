@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { LoggerOptions } from 'typeorm';
 
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
@@ -12,7 +13,8 @@ import { OverviewModule } from './overview/overview.module';
 import { Category } from './category/entity/category.entity';
 import { Statement } from './statement/entities/statement.entity';
 import { User } from './user/entity/user.entity';
-import { LoggerOptions } from 'typeorm';
+
+import { configValidationSchema } from './config/schemas/config.schemas';
 
 @Module({
   imports: [
@@ -22,6 +24,10 @@ import { LoggerOptions } from 'typeorm';
     OverviewModule,
     ConfigModule.forRoot({
       envFilePath: ['.env'],
+      validationSchema: configValidationSchema,
+      validationOptions: {
+        abortEarly: true, // abort on first catch error
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
