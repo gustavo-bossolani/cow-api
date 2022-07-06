@@ -28,7 +28,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  await app.listen(3000);
-  logger.log(`Application listening on ${3000}`);
+  const port = parseInt(process.env.HOST_PORT) || 3000;
+
+  await app.listen(port);
+  logger.log(`Application listening on ${port}`);
 }
 bootstrap();

@@ -1,3 +1,4 @@
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -11,6 +12,7 @@ import { OverviewModule } from './overview/overview.module';
 import { Category } from './category/entity/category.entity';
 import { Statement } from './statement/entities/statement.entity';
 import { User } from './user/entity/user.entity';
+import { LoggerOptions } from 'typeorm';
 
 @Module({
   imports: [
@@ -18,17 +20,32 @@ import { User } from './user/entity/user.entity';
     CategoryModule,
     AuthModule,
     OverviewModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'docker',
-      password: 'docker',
-      database: 'cow',
-      entities: [User, Statement, Category],
-      autoLoadEntities: true,
-      synchronize: true,
-      logging: ['query', 'error'],
+    ConfigModule.forRoot({
+      envFilePath: ['.env'],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        const production = config.get('ENV') === 'dev';
+        const logging = [production ? 'query' : '', 'error'].filter(
+          (item) => !!item,
+        );
+
+        return {
+          type: 'postgres',
+          autoLoadEntities: true,
+          synchronize: production,
+          entities: [User, Statement, Category],
+          logging: logging as LoggerOptions,
+
+          host: config.get('DATABASE_HOST'),
+          port: config.get('DATABASE_PORT'),
+          username: config.get('DATABASE_USERNAME'),
+          password: config.get('DATABASE_PASSWORD'),
+          database: config.get('DATABASE_DATABASE'),
+        };
+      },
     }),
   ],
   controllers: [AppController],
