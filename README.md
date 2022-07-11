@@ -4,22 +4,17 @@ Based on [Nest](https://github.com/nestjs/nest) the cow-api helps you  providing
 
 You can access more information on `/api` resource with your browser.
 
-<br>
-
 ## Installation
 
 ```bash
 $ npm install
 ```
 
-<br>
-
 ## Setting the .env config
 
 You need to change the `.env` values to provide to the application the correct connection and rules.
 
 The application already have a configured `.env` file with mock and local information, if you want to change some value is up to you. You can use the example bellow:
-
 
 ```enviroment
 # ENV
@@ -42,8 +37,6 @@ JWT_EXPIRESIN=3600
 ```
 All the information provided on `.env` file is being validated with [Joi](https://docs.nestjs.com/techniques/configuration#schema-validation).
 
-<br>
-
 ## Running the application
 
 
@@ -57,8 +50,6 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
-<br>
-
 ## Test
 
 ```bash
@@ -71,5 +62,3 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-<br>
-
