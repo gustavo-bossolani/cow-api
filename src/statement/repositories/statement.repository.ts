@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 
 import { increaseMonth } from 'src/shared/util/increase-month-date';
@@ -17,6 +18,8 @@ import { Page } from 'src/shared/components/pagination/page.model';
 
 @EntityRepository(Statement)
 class StatementRepository extends Repository<Statement> {
+  private logger = new Logger('StatementService');
+
   async createStatement(
     createStatementDto: CreateStatementDto,
     category: Category,
@@ -38,6 +41,8 @@ class StatementRepository extends Repository<Statement> {
 
     await this.save(statement);
 
+    this.logger.log('Statement created.');
+
     return statement;
   }
 
@@ -46,6 +51,8 @@ class StatementRepository extends Repository<Statement> {
     statement: Statement,
     category: Category,
   ): Promise<void> {
+    this.logger.log('Verifying statement data.');
+
     const { installment, startDate } = updateStatementDto;
     const { installment: dbStatement, startDate: dbStartDate } = statement;
 
@@ -77,11 +84,16 @@ class StatementRepository extends Repository<Statement> {
     }
 
     await this.save(statement);
+    this.logger.log('Statement updated.');
   }
 
   async countAllFutureStatementsPerCategory(
     user: User,
   ): Promise<CountStatementPerCategory[]> {
+    this.logger.log(
+      `Counting all future statements per category for user ${user.username}.`,
+    );
+
     const statementQuery = this.createQueryBuilder('statement')
       .select(
         'CAST(COUNT(category.name) AS DOUBLE PRECISION) as total, category.name as category',
@@ -102,6 +114,10 @@ class StatementRepository extends Repository<Statement> {
   async countAllFutureStatementsAndAmountIfHasInstallment(
     user: User,
   ): Promise<CountStatementWithInstallment[]> {
+    this.logger.log(
+      `Counting all future statements and amount if statement has installment for user ${user.username}.`,
+    );
+
     const statementQuery = await this.createQueryBuilder('statement')
       .select(
         'COUNT(installment)::INTEGER as statements, CAST(SUM(amount) AS DOUBLE PRECISION) as amount',
@@ -123,6 +139,10 @@ class StatementRepository extends Repository<Statement> {
     month: number,
     year: number,
   ): Promise<CountStatementByCategory[]> {
+    this.logger.log(
+      `Counting statements per category with month ${month} and year ${year}.`,
+    );
+
     const statementQuery = this.createQueryBuilder('statement')
       .select(
         'COUNT(category.name)::INTEGER as total, category.name as category',
@@ -145,6 +165,10 @@ class StatementRepository extends Repository<Statement> {
     month: number,
     year: number,
   ): Promise<CountStatementWithInstallment[]> {
+    this.logger.log(
+      `Counting statements and amount if the statement has installment with month ${month} and year ${year}.`,
+    );
+
     const statementQuery = await this.createQueryBuilder('statement')
       .select(
         'COUNT(installment)::INTEGER as statements, CAST(SUM(amount) AS DOUBLE PRECISION) as amount',
@@ -176,6 +200,10 @@ class StatementRepository extends Repository<Statement> {
     user: User,
     options: PaginatorOptionsDto,
   ): Promise<Page<Statement>> {
+    this.logger.log(
+      `Separating statements and total for month ${month} and year ${year}.`,
+    );
+
     const { limit, page } = options;
 
     const skip = Paginator.calculateOffset(page, limit);
@@ -222,6 +250,9 @@ class StatementRepository extends Repository<Statement> {
     month: number,
     year: number,
   ): Promise<number> {
+    this.logger.log(
+      `Counting total amount for month ${month} and year ${year}.`,
+    );
     const statementQuery = await this.createQueryBuilder('statement')
       .select('CAST(SUM("statement"."amount") AS DOUBLE PRECISION) AS total')
       .where(
