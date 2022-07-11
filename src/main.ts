@@ -9,6 +9,8 @@ import { CategoryModule } from 'src/category/category.module';
 import { AuthModule } from './auth/auth.module';
 
 import { TransformInterceptor } from './transform.interceptor';
+import { LoggerInterceptor } from './shared/interceptors/logger-interceptor/logger.interceptor';
+import { ErrorInterceptorInterceptor } from './shared/interceptors/error-interceptor/error-interceptor.interceptor';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -26,7 +28,11 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(
+    new TransformInterceptor(),
+    new LoggerInterceptor(),
+    new ErrorInterceptorInterceptor(),
+  );
 
   const port = parseInt(process.env.HOST_PORT) || 3000;
 
