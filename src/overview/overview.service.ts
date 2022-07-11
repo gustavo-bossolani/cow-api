@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { StatementRepository } from 'src/statement/repositories/statement.repository';
@@ -12,12 +12,16 @@ import { OverviewMonthlyDto } from './dto/overview-monthly.dto';
 
 @Injectable()
 export class OverviewService {
+  private logger = new Logger('OverviewService');
+
   constructor(
     @InjectRepository(StatementRepository)
     private statementRepository: StatementRepository,
   ) {}
 
   async getStatementsOverviewAll(user: User): Promise<OverviewAllDto> {
+    this.logger.log(`Retrieving overview data for username ${user.username}.`);
+
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
         this.statementRepository.countAllFutureStatementsPerCategory(user),
@@ -35,6 +39,8 @@ export class OverviewService {
     user: User,
     options: PaginatorOptionsDto,
   ): Promise<OverviewMonthlyDto<Statement>> {
+    this.logger.log('Retrieving a month overview.');
+
     const paginator = (await this.statementRepository.getStatementsPerMonth(
       month,
       year,
