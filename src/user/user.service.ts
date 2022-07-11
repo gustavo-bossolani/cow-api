@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import * as bcrypt from 'bcrypt';
@@ -13,6 +13,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
+  private logger = new Logger('UserService');
+
   constructor(
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
@@ -23,6 +25,8 @@ export class UserService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
+    this.logger.log(`Searching for user ${changePasswordDto.username}.`);
+
     const { newPassord, secret, username } = changePasswordDto;
 
     const user = await this.userRepository.findOne({ username });
@@ -32,8 +36,8 @@ export class UserService {
       const hashedPassword = await bcrypt.hash(newPassord, passwordSalt);
 
       Object.assign(user, { ...user, password: hashedPassword });
-
       await this.userRepository.save(user);
+      this.logger.log('Password changed.');
     } else {
       throw new UnauthorizedException('Check your credentials.');
     }
@@ -42,11 +46,17 @@ export class UserService {
   async verifyUserCredentials(
     signInCredentials: SignInCredentialsDto,
   ): Promise<User> {
+    this.logger.log(
+      `Verifying user credentials for user ${signInCredentials.username}.`,
+    );
+
     const { password, username } = signInCredentials;
 
     const user = await this.userRepository.findOne({ username });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+      this.logger.log('User verified.');
+
       return user;
     }
 

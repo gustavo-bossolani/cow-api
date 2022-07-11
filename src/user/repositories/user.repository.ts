@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import {
   ConflictException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -12,8 +13,12 @@ import { User } from 'src/user/entity/user.entity';
 
 @EntityRepository(User)
 class UserRepository extends Repository<User> {
+  private logger = new Logger('UserRepository');
+
   async createUser(signUpCredentials: SignUpCredentialsDto) {
     const { name, password, username, secret } = signUpCredentials;
+
+    this.logger.log(`Generating user.`);
 
     const passwordSalt = await bcrypt.genSalt();
     const secretSalt = await bcrypt.genSalt();
@@ -30,10 +35,11 @@ class UserRepository extends Repository<User> {
 
     try {
       await this.save(user);
+      this.logger.log(`User ${user.username} created.`);
     } catch (error) {
       const POSTGRES_UNIQUE_ERROR_CODE = '23505';
       if (error.code === POSTGRES_UNIQUE_ERROR_CODE) {
-        throw new ConflictException('Username already in use.');
+        throw new ConflictException(`Username ${username} already in use.`);
       }
       throw new InternalServerErrorException();
     }
