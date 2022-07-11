@@ -1,6 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
 import {
-  BadRequestException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,7 +15,11 @@ import { Category } from 'src/category/entity/category.entity';
 
 @EntityRepository(Category)
 class CategoryRepository extends Repository<Category> {
+  private logger = new Logger('CategoryRepository');
+
   async filterBy(filter: FilterCategoryDto, user: User): Promise<Category> {
+    this.logger.log('Validating filters.');
+
     const { id, name } = filter;
 
     let category: Category;
@@ -28,8 +32,10 @@ class CategoryRepository extends Repository<Category> {
       category = await this.findOne({ name, user });
     }
 
-    if (!category)
+    if (!category) {
+      this.logger.error('Category not found.');
       throw new NotFoundException(new DefineError('Category not found.', 404));
+    }
 
     return category;
   }
@@ -38,11 +44,15 @@ class CategoryRepository extends Repository<Category> {
     createCategoryDto: CreateCategoryDto,
     user: User,
   ): Promise<Category> {
+    this.logger.log('Searching for a cateogory.');
+
     const { name, color } = createCategoryDto;
 
     const found = await this.findOne({ name, user });
 
     if (found) {
+      this.logger.error('Category already exists.');
+
       throw new UnauthorizedException(
         new DefineError('Category already exists.', 401),
       );
@@ -51,6 +61,7 @@ class CategoryRepository extends Repository<Category> {
     const category = this.create({ name, color, user });
 
     await this.save(category);
+    this.logger.log('Category created.');
 
     return category;
   }

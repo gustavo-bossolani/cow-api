@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { CategoryRepository } from 'src/category/repositories/category.repository';
 import { DefineError } from 'src/shared/models/define-error.model';
@@ -14,6 +14,8 @@ import { Paginator } from 'src/shared/components/pagination/paginator.model';
 
 @Injectable()
 export class CategoryService {
+  private logger = new Logger('CategoryService');
+
   constructor(private categoryRepository: CategoryRepository) {}
 
   async getBy(filter: FilterCategoryDto, user: User): Promise<Category> {
@@ -25,6 +27,7 @@ export class CategoryService {
     options: PaginatorOptionsDto,
   ): Promise<Page<Category>> {
     const { limit, page } = options;
+    this.logger.log(`Filtering categories for ${page} pages limit ${limit}.`);
 
     const [results, total] = await this.categoryRepository.findAndCount({
       take: limit,
@@ -40,9 +43,14 @@ export class CategoryService {
   }
 
   async delete(id: string, user: User): Promise<void> {
+    this.logger.log('Searching category for delete.');
+
     const deleteStatement = await this.categoryRepository.delete({ id, user });
+    this.logger.log('Category deleted.');
 
     if (!deleteStatement.affected) {
+      this.logger.error('Category not found.');
+
       throw new NotFoundException(new DefineError('Category not found', 404));
     }
   }
