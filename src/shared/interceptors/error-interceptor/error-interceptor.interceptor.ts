@@ -26,7 +26,7 @@ export class ErrorInterceptorInterceptor implements NestInterceptor {
         return throwError(
           () =>
             new InternalServerErrorException(
-              new DefineError('Uncatched error', 500),
+              new DefineError('Unexpected error', 500),
             ),
         );
       }),
