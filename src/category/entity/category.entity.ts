@@ -21,7 +21,7 @@ class Category {
   name: string;
 
   @ApiProperty({ example: '#FFFF' })
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: '' })
   color?: string;
 
   @OneToMany((_type) => Statement, (statement) => statement.user, {

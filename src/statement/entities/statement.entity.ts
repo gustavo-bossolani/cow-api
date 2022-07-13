@@ -17,7 +17,7 @@ class Statement {
   @Column()
   title: string;
 
-  @Column({ default: '', nullable: true })
+  @Column({ nullable: true, default: '' })
   description: string;
 
   @Column()
