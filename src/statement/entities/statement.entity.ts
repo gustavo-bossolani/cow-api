@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 import { Category } from 'src/category/entity/category.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -11,7 +17,7 @@ class Statement {
   @Column()
   title: string;
 
-  @Column({ default: '' })
+  @Column({ default: '', nullable: true })
   description: string;
 
   @Column()
@@ -27,6 +33,7 @@ class Statement {
   amount: number;
 
   @ManyToOne((_type) => User, (user) => user.statement, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @ManyToOne((_type) => Category, (category) => category.statement, {
@@ -34,6 +41,7 @@ class Statement {
     eager: true,
     lazy: false,
   })
+  @JoinColumn({ name: 'categoryId' })
   category?: Category;
 }
 
