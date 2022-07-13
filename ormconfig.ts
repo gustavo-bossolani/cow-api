@@ -5,9 +5,6 @@ import { LoggerOptions } from 'typeorm';
 const production = process.env.ENV === 'dev';
 const logging = [production ? 'query' : '', 'error'].filter((item) => !!item);
 
-console.log(process.env.DATABASE_PORT);
-console.log(typeof process.env.DATABASE_PORT);
-
 export const TypeOrmConnection: TypeOrmModuleOptions = {
   // general config
   type: 'postgres',
@@ -31,14 +28,7 @@ export const TypeOrmConnection: TypeOrmModuleOptions = {
 
   // cli config
   cli: {
-    migrationsDir: join(
-      __dirname,
-      'src',
-      'config',
-      'database',
-      'migrations',
-      '*{.ts,.js}',
-    ),
+    migrationsDir: join('src', 'config', 'database', 'migrations'),
   },
 };
 
