@@ -34,7 +34,7 @@ async function bootstrap() {
     new ErrorInterceptorInterceptor(),
   );
 
-  const port = parseInt(process.env.HOST_PORT) || 3000;
+  const port = parseInt(process.env.PORT) || 3000;
 
   await app.listen(port);
   logger.log(`Application listening on ${port}`);
