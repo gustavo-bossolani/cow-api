@@ -1,3 +1,4 @@
 release: npm run db:revert
 release: npm run migration:run
-web: npm run build
+release: npm run build
+web: npm run start:prod
