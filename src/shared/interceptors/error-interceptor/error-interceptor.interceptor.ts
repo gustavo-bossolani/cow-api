@@ -23,6 +23,8 @@ export class ErrorInterceptorInterceptor implements NestInterceptor {
 
         if (dev) this.logger.error(`Stack ${error.stack}`);
 
+        if (error.getStatus() !== 500) return throwError(() => error);
+
         return throwError(
           () =>
             new InternalServerErrorException(
