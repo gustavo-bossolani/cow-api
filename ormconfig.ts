@@ -6,6 +6,11 @@ const production = process.env.ENV === 'prod';
 const logging = [production ? 'error' : '', 'query'].filter((item) => !!item);
 
 export const TypeOrmConnection: TypeOrmModuleOptions = {
+  // ssl config
+  ssl: production,
+  extra: {
+    ssl: production ? { rejectUnauthorized: false } : null,
+  },
   // general config
   type: 'postgres',
   autoLoadEntities: true,
