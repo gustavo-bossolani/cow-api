@@ -3,7 +3,7 @@ import { join } from 'path';
 import { LoggerOptions } from 'typeorm';
 
 const production = process.env.ENV === 'prod';
-const logging = [production ? 'error' : '', 'query'].filter((item) => !!item);
+const logging = production ? [] : ['error', 'query'].filter((item) => !!item);
 
 export const TypeOrmConnection: TypeOrmModuleOptions = {
   // ssl config

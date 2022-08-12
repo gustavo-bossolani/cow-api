@@ -13,9 +13,10 @@ import { join } from 'path';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
         const production = config.get('ENV') === 'prod';
-        const logging = [production ? 'error' : '', 'query'].filter(
-          (item) => !!item,
-        );
+        const logging = production
+          ? []
+          : ['error', 'query'].filter((item) => !!item);
+
         return {
           ssl: production,
           extra: {
