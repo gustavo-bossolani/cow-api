@@ -12,7 +12,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 
 @Injectable()
 export class ErrorInterceptorInterceptor implements NestInterceptor {
-  private logger = new Logger('Error interceptor');
+  private logger = new Logger('Errorinterceptor');
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const dev = process.env.ENV === 'dev';
