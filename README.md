@@ -62,3 +62,19 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Migrations
+
+```bash
+# run the migrations and build the database
+$ migration:run
+
+# revert migrations one by one
+$ migration:revert
+
+# create a new migration
+$ migration:create [name]
+
+# drop the database
+$ db:revert
+```
