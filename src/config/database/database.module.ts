@@ -12,12 +12,15 @@ import { join } from 'path';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        const production = config.get('ENV') === 'dev';
-        const logging = [production ? 'query' : '', 'error'].filter(
+        const production = config.get('ENV') === 'prod';
+        const logging = [production ? 'error' : '', 'query'].filter(
           (item) => !!item,
         );
-
         return {
+          ssl: production,
+          extra: {
+            ssl: production ? { rejectUnauthorized: false } : null,
+          },
           type: 'postgres',
           autoLoadEntities: true,
           synchronize: false,

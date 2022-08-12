@@ -2,8 +2,8 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { join } from 'path';
 import { LoggerOptions } from 'typeorm';
 
-const production = process.env.ENV === 'dev';
-const logging = [production ? 'query' : '', 'error'].filter((item) => !!item);
+const production = process.env.ENV === 'prod';
+const logging = [production ? 'error' : '', 'query'].filter((item) => !!item);
 
 export const TypeOrmConnection: TypeOrmModuleOptions = {
   // general config
