@@ -15,6 +15,14 @@ import { User } from 'src/user/entity/user.entity';
 import { Category } from 'src/category/entity/category.entity';
 import { Paginator } from 'src/shared/components/pagination/paginator.model';
 import { Page } from 'src/shared/components/pagination/page.model';
+import {
+  countAllStatementsPerCategory,
+  countAllFutureStatementsAndAmountIfHasInstallment,
+  countMonthlyStatementsPerCategory,
+  countTotalMonthAmount,
+  countTotalStatementsWithInstallmentPlanMonthly,
+  getStatementsPerMonth,
+} from '../queries';
 
 @EntityRepository(Statement)
 class StatementRepository extends Repository<Statement> {
@@ -87,28 +95,14 @@ class StatementRepository extends Repository<Statement> {
     this.logger.log('Statement updated.');
   }
 
-  async countAllFutureStatementsPerCategory(
+  async countAllStatementsPerCategory(
     user: User,
   ): Promise<CountStatementPerCategory[]> {
     this.logger.log(
       `Counting all future statements per category for user ${user.username}.`,
     );
 
-    const statementQuery = this.createQueryBuilder('statement')
-      .select(
-        'CAST(COUNT(category.name) AS DOUBLE PRECISION) as total, category.name as category',
-      )
-      .innerJoin('category', 'category', 'category.id = statement.categoryId')
-      .andWhere(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
-        EXTRACT(MONTH FROM CURRENT_DATE:: date) + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
-        `,
-      )
-      .andWhere({ user })
-      .groupBy('category.name');
-
-    return await statementQuery.getRawMany();
+    return await this.query(countAllStatementsPerCategory(user.id));
   }
 
   async countAllFutureStatementsAndAmountIfHasInstallment(
@@ -118,23 +112,12 @@ class StatementRepository extends Repository<Statement> {
       `Counting all future statements and amount if statement has installment for user ${user.username}.`,
     );
 
-    const statementQuery = await this.createQueryBuilder('statement')
-      .select(
-        'COUNT(installment)::INTEGER as statements, CAST(SUM(amount) AS DOUBLE PRECISION) as amount',
-      )
-      .where('statement.installment > 0')
-      .andWhere(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - EXTRACT(YEARS FROM CURRENT_DATE::date)::int) * 12) -
-        EXTRACT(MONTH FROM CURRENT_DATE:: date) + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
-        `,
-      )
-      .andWhere({ user });
-
-    return await statementQuery.getRawMany();
+    return await this.query(
+      countAllFutureStatementsAndAmountIfHasInstallment(user.id),
+    );
   }
 
-  async countStatementsPerCategory(
+  async countMonthlyStatementsPerCategory(
     user: User,
     month: number,
     year: number,
@@ -143,24 +126,12 @@ class StatementRepository extends Repository<Statement> {
       `Counting statements per category with month ${month} and year ${year}.`,
     );
 
-    const statementQuery = this.createQueryBuilder('statement')
-      .select(
-        'COUNT(category.name)::INTEGER as total, category.name as category',
-      )
-      .innerJoin('category', 'category', 'category.id = statement.categoryId')
-      .where({ user })
-      .andWhere(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
-        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0
-        `,
-      )
-      .groupBy('category.name');
-
-    return await statementQuery.getRawMany();
+    return await this.query(
+      countMonthlyStatementsPerCategory(user.id, year, month),
+    );
   }
 
-  async countStatementsAndAmountIfHasInstallment(
+  async countTotalStatementsWithInstallmentPlanMonthly(
     user: User,
     month: number,
     year: number,
@@ -169,29 +140,9 @@ class StatementRepository extends Repository<Statement> {
       `Counting statements and amount if the statement has installment with month ${month} and year ${year}.`,
     );
 
-    const statementQuery = await this.createQueryBuilder('statement')
-      .select(
-        'COUNT(installment)::INTEGER as statements, CAST(SUM(amount) AS DOUBLE PRECISION) as amount',
-      )
-      .where('statement.installment > 0')
-      .andWhere(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
-        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) > 0
-        `,
-      )
-      .andWhere({ user });
-
-    let response = await statementQuery.getRawMany();
-
-    if (response) {
-      const { statements, amount } = response[0];
-      if (!statements || !amount) {
-        response = [];
-      }
-    }
-
-    return response;
+    return await this.query(
+      countTotalStatementsWithInstallmentPlanMonthly(user.id, year, month),
+    );
   }
 
   async getStatementsPerMonth(
@@ -205,41 +156,21 @@ class StatementRepository extends Repository<Statement> {
     );
 
     const { limit, page } = options;
-
     const skip = Paginator.calculateOffset(page, limit);
 
-    const statementQueryForTotal = await this.createQueryBuilder('statement')
-      .select('COUNT()')
-      .where(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) - 
-        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0`,
-      )
+    const statementQueryForTotal = this.createQueryBuilder('statement')
+      .select('COUNT(*)')
+      .where('statement.startDate - :startDate <= 0', {
+        startDate: `${year}-${month}-01`,
+      })
+      .andWhere('statement.finishDate - :finishDate >= 0', {
+        finishDate: `${year}-${month}-01`,
+      })
       .andWhere({ user });
-
-    const statementQueryForStatementsPerMonth = await this.createQueryBuilder(
-      'statement',
-    )
-      .select(
-        `
-          *,
-          CAST("statement"."amount"AS DOUBLE PRECISION),
-          (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
-          ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) AS "installments"
-        `,
-      )
-      .innerJoin(Category, 'category', 'category.id = statement.categoryId')
-      .where({ user })
-      .andWhere(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
-        ${month} + EXTRACT(MONTH FROM "statement"."finishDate":: date):: int) >= 0 LIMIT ${limit} OFFSET ${skip}
-        `,
-      );
 
     const [total, results] = await Promise.all([
       statementQueryForTotal.getCount(),
-      statementQueryForStatementsPerMonth.getRawMany<Statement>(),
+      this.query(getStatementsPerMonth(user.id, year, month, limit, skip)),
     ]);
 
     return new Page({ options, results, total });
@@ -253,19 +184,12 @@ class StatementRepository extends Repository<Statement> {
     this.logger.log(
       `Counting total amount for month ${month} and year ${year}.`,
     );
-    const statementQuery = await this.createQueryBuilder('statement')
-      .select('CAST(SUM("statement"."amount") AS DOUBLE PRECISION) AS total')
-      .where(
-        `
-        (((EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - ${year}) * 12) -
-        ${month} + EXTRACT(MONTH FROM "statement"."finishDate"::date):: int) >= 0
-        `,
-      )
-      .andWhere({ user });
 
-    const { total } = await statementQuery.getRawOne();
+    const [{ amount }] = await this.query(
+      countTotalMonthAmount(user.id, year, month),
+    );
 
-    return total as number;
+    return amount as number;
   }
 }
 

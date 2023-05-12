@@ -6,7 +6,7 @@
  * @example increaseMonth('2022-01-15', 4): '2022-05-15'
  */
 const increaseMonth = (startDate: string, quantity: number): string => {
-  const date = new Date(startDate);
+  const date = new Date(startDate); // TODO: revisar datas com dias a mais
 
   if (quantity) {
     date.setMonth(date.getMonth() + quantity);

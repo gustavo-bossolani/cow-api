@@ -23,7 +23,7 @@ class OverviewMonthlyDto<T> {
   @ApiProperty({
     example: [{ statements: 2, amount: 2000 }],
   })
-  statementsWithInstallment: CountStatementWithInstallment[];
+  statementsWithInstallmentPlan: CountStatementWithInstallment[];
 }
 
 export { OverviewMonthlyDto };

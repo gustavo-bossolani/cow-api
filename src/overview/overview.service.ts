@@ -24,7 +24,7 @@ export class OverviewService {
 
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
-        this.statementRepository.countAllFutureStatementsPerCategory(user),
+        this.statementRepository.countAllStatementsPerCategory(user),
         this.statementRepository.countAllFutureStatementsAndAmountIfHasInstallment(
           user,
         ),
@@ -49,22 +49,28 @@ export class OverviewService {
     )) as any;
 
     paginator.results.map((result) => {
-      // create installment amount
-      if (result.installment > 0) {
-        result['installmentAmount'] = result.amount / result.installment;
-      } else {
-        result['installmentAmount'] = result.amount;
-      }
+      const typedResult: Statement = result;
 
-      result['remainingInstallments'] = result['installments'];
+      // create installment amount
+      if (typedResult.installment) {
+        result['installmentAmount'] =
+          typedResult.amount / typedResult.installment;
+      } else {
+        result['installmentAmount'] = typedResult.amount;
+      }
 
       // create category object
       const { name, color, categoryId } = result;
-      result.category = {
-        id: categoryId,
-        name,
-        color,
-      };
+
+      if (result.categoryId) {
+        result.category = {
+          id: categoryId,
+          name,
+          color,
+        };
+      } else {
+        result.category = null;
+      }
 
       delete result.name;
       delete result.color;
@@ -74,22 +80,29 @@ export class OverviewService {
       return result;
     });
 
-    const [monthlyAmount, statementsPerCategory, statementsWithInstallment] =
-      await Promise.all([
-        this.statementRepository.countTotalMonthAmount(user, month, year),
-        this.statementRepository.countStatementsPerCategory(user, month, year),
-        this.statementRepository.countStatementsAndAmountIfHasInstallment(
-          user,
-          month,
-          year,
-        ),
-      ]);
+    const [
+      monthlyAmount,
+      statementsPerCategory,
+      statementsWithInstallmentPlan,
+    ] = await Promise.all([
+      this.statementRepository.countTotalMonthAmount(user, month, year),
+      this.statementRepository.countMonthlyStatementsPerCategory(
+        user,
+        month,
+        year,
+      ),
+      this.statementRepository.countTotalStatementsWithInstallmentPlanMonthly(
+        user,
+        month,
+        year,
+      ),
+    ]);
 
     return {
-      monthlyAmount,
       paginator,
+      monthlyAmount,
       statementsPerCategory,
-      statementsWithInstallment,
+      statementsWithInstallmentPlan,
     };
   }
 }
