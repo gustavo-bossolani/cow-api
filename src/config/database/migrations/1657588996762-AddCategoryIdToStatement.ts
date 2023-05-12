@@ -14,7 +14,7 @@ export class AddCategoryIdToStatement1657588996762
       new TableColumn({
         name: 'categoryId',
         type: 'uuid',
-        isNullable: false,
+        isNullable: true,
       }),
     );
 

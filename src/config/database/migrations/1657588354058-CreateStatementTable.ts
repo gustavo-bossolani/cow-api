@@ -28,7 +28,7 @@ export class CreateStatementTable1657588354058 implements MigrationInterface {
           },
           {
             name: 'finishDate',
-            type: 'varchar',
+            type: 'date',
           },
           {
             name: 'amount',
@@ -36,7 +36,7 @@ export class CreateStatementTable1657588354058 implements MigrationInterface {
           },
           {
             name: 'startDate',
-            type: 'varchar',
+            type: 'date',
           },
         ],
       }),

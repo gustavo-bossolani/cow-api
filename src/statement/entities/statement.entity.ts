@@ -23,10 +23,14 @@ class Statement {
   @Column()
   installment: number;
 
-  @Column()
+  @Column({
+    type: 'date',
+  })
   finishDate: string;
 
-  @Column()
+  @Column({
+    type: 'date',
+  })
   startDate: string;
 
   @Column({ type: 'decimal', scale: 2 })
