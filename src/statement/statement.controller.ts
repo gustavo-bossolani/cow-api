@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -77,7 +78,7 @@ export class StatementController {
   @ApiResponse(apiResponseForCreateStatement)
   // swagger
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   createStatement(
     @Body() createStatementDto: CreateStatementDto,
     @GetUser() user: User,
@@ -103,7 +104,7 @@ export class StatementController {
   @ApiResponse(apiResponseForDeleteStatement)
   // swagger
   @Delete('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteStatemetnById(
     @Param('id') id: string,
     @GetUser() user: User,
@@ -118,7 +119,7 @@ export class StatementController {
   @ApiResponse(apiResponseForUpdateStatement)
   // swagger
   @Patch('/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   updateStatement(
     @Body() updateStatementDto: UpdateStatementDto,
     @Param('id') id: string,

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
+import { PostgresErrorCode } from 'src/shared/models/postgres-error-code.enum';
 import { SignUpCredentialsDto } from '../dto/sign-up-credentials.dto';
 
 import { User } from 'src/user/entity/user.entity';
@@ -37,8 +38,7 @@ class UserRepository extends Repository<User> {
       await this.save(user);
       this.logger.log(`User ${user.username} created.`);
     } catch (error) {
-      const POSTGRES_UNIQUE_ERROR_CODE = '23505';
-      if (error.code === POSTGRES_UNIQUE_ERROR_CODE) {
+      if (error.code === PostgresErrorCode.UniqueViolation) {
         throw new ConflictException(`Username ${username} already in use.`);
       }
       throw new InternalServerErrorException();
