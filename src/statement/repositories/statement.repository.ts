@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 
 import { increaseMonth } from 'src/shared/util/increase-month-date';
@@ -17,12 +17,13 @@ import { Paginator } from 'src/shared/components/pagination/paginator.model';
 import { Page } from 'src/shared/components/pagination/page.model';
 import {
   countAllStatementsPerCategory,
-  countAllFutureStatementsAndAmountIfHasInstallment,
+  countAllFutureStatementsAndAmountIfHasInstallmentPlan,
   countMonthlyStatementsPerCategory,
   countTotalMonthAmount,
   countTotalStatementsWithInstallmentPlanMonthly,
   getStatementsPerMonth,
 } from '../queries';
+import { PostgresErrorCode } from 'src/shared/models/postgres-error-code.enum';
 
 @EntityRepository(Statement)
 class StatementRepository extends Repository<Statement> {
@@ -47,11 +48,18 @@ class StatementRepository extends Repository<Statement> {
       category,
     });
 
-    await this.save(statement);
-
-    this.logger.log('Statement created.');
-
-    return statement;
+    try {
+      await this.save(statement);
+      this.logger.log('Statement created.');
+      return statement;
+    } catch (error) {
+      if (error.code === PostgresErrorCode.CheckViolation) {
+        throw new HttpException(
+          'Installment has to be greater than one',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+    }
   }
 
   async updateStatement(
@@ -62,7 +70,7 @@ class StatementRepository extends Repository<Statement> {
     this.logger.log('Verifying statement data.');
 
     const { installment, startDate } = updateStatementDto;
-    const { installment: dbStatement, startDate: dbStartDate } = statement;
+    const { installment: dbInstallment, startDate: dbStartDate } = statement;
 
     Object.assign(statement, { ...updateStatementDto, category });
 
@@ -86,7 +94,7 @@ class StatementRepository extends Repository<Statement> {
     if (!installment && startDate) {
       Object.assign(statement, {
         ...statement,
-        finishDate: increaseMonth(startDate, dbStatement),
+        finishDate: increaseMonth(startDate, dbInstallment),
         startDate,
       });
     }
@@ -105,7 +113,7 @@ class StatementRepository extends Repository<Statement> {
     return await this.query(countAllStatementsPerCategory(user.id));
   }
 
-  async countAllFutureStatementsAndAmountIfHasInstallment(
+  async countAllFutureStatementsAndAmountIfHasInstallmentPlan(
     user: User,
   ): Promise<CountStatementWithInstallment[]> {
     this.logger.log(
@@ -113,7 +121,7 @@ class StatementRepository extends Repository<Statement> {
     );
 
     return await this.query(
-      countAllFutureStatementsAndAmountIfHasInstallment(user.id),
+      countAllFutureStatementsAndAmountIfHasInstallmentPlan(user.id),
     );
   }
 

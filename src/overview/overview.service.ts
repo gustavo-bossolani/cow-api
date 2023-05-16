@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { StatementRepository } from 'src/statement/repositories/statement.repository';
@@ -25,7 +25,7 @@ export class OverviewService {
     const [statementsPerCategory, statementsWithInstallment] =
       await Promise.all([
         this.statementRepository.countAllStatementsPerCategory(user),
-        this.statementRepository.countAllFutureStatementsAndAmountIfHasInstallment(
+        this.statementRepository.countAllFutureStatementsAndAmountIfHasInstallmentPlan(
           user,
         ),
       ]);
@@ -48,13 +48,18 @@ export class OverviewService {
       options,
     )) as any;
 
+    if (!paginator.results.length) {
+      throw new HttpException('No results for this month', HttpStatus.OK);
+    }
+
     paginator.results.map((result) => {
       const typedResult: Statement = result;
 
       // create installment amount
-      if (typedResult.installment) {
-        result['installmentAmount'] =
-          typedResult.amount / typedResult.installment;
+      if (typedResult.installment > 1) {
+        result['installmentAmount'] = Number.parseFloat(
+          (typedResult.amount / typedResult.installment).toFixed(2),
+        );
       } else {
         result['installmentAmount'] = typedResult.amount;
       }

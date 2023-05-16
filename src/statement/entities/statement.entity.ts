@@ -4,12 +4,14 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Check,
 } from 'typeorm';
 
 import { Category } from 'src/category/entity/category.entity';
 import { User } from 'src/user/entity/user.entity';
 
 @Entity()
+@Check(`"installment" > 0`)
 class Statement {
   @PrimaryGeneratedColumn('uuid')
   id: string;

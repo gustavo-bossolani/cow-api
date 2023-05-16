@@ -18,29 +18,24 @@ export const countAllStatementsPerCategory = (
   `;
 };
 
-export const countAllFutureStatementsAndAmountIfHasInstallment = (
+export const countAllFutureStatementsAndAmountIfHasInstallmentPlan = (
   userId: string,
 ) => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
   return `
-    SELECT 
-      COUNT(installment) as statements,
-      CAST(SUM(amount) AS DOUBLE PRECISION) as amount 
-
-    FROM "statement" "statement"
-
-    WHERE "statement"."installment" > 0 AND
-      (
-        (
-          (
-            EXTRACT(YEARS FROM "statement"."finishDate"::date)::int - 
-            EXTRACT(YEARS FROM CURRENT_DATE::date)::int
-          ) * 12
-        ) -
-        EXTRACT(MONTH FROM CURRENT_DATE:: date) + 
-        EXTRACT(MONTH FROM "statement"."finishDate":: date):: int
-      ) > 0
-            
-    AND "statement"."userId" = '${userId}';
+    SELECT
+      COUNT(*) as statements,
+      CAST(SUM(amount) AS DOUBLE PRECISION) as amount
+    FROM
+      statement
+    WHERE
+      "statement"."finishDate" > '${year}-${
+    month < 10 ? '0' + month : month
+  }-01'
+    AND
+      "statement"."userId" = '${userId}';             
   `;
 };
 
@@ -75,17 +70,12 @@ export const countTotalMonthAmount = (
 ) => {
   return `
     SELECT
-      CAST(
-        TO_CHAR(
-          SUM(
-            COALESCE(
-              "statement"."amount" / NULLIF("statement"."installment", 0),
-              "statement"."amount"
-            )
-          ),
-          '99999999999999.00'
-        ) AS DOUBLE PRECISION
-      ) AS amount
+    CAST(
+      TO_CHAR(
+        SUM("statement"."amount" / "statement"."installment"),
+        '99999999999999.00'
+      ) AS DOUBLE PRECISION
+    ) AS amount
     FROM
       statement
     WHERE
@@ -108,7 +98,7 @@ export const countTotalStatementsWithInstallmentPlanMonthly = (
     FROM
       "statement" "statement"
     WHERE
-      "statement"."installment" > 0
+      "statement"."installment" > 1
     AND
       "statement"."startDate" - '${year}-${month}-01' <= 0
     AND
@@ -131,7 +121,7 @@ export const getStatementsPerMonth = (
       statement.title,
       statement.description,
       TO_CHAR("statement"."finishDate", 'yyyy-mm-dd') AS finishDate,
-      TO_CHAR("statement"."startDate", 'yyyy-mm-d') AS startDate,
+      TO_CHAR("statement"."startDate", 'yyyy-mm-dd') AS startDate,
       CAST(statement.amount AS DOUBLE PRECISION),
       statement.installment,
       statement."categoryId",
