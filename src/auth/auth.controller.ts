@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Put,
+} from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
@@ -46,6 +53,7 @@ export class AuthController {
   @ApiBadRequestResponse(apiBadRequestResponseForSignUpMethod)
   // swagger
   @Post('/signup')
+  @HttpCode(HttpStatus.CREATED)
   signUp(@Body() signUpCredentials: SignUpCredentialsDto): Promise<void> {
     return this.authService.signUp(signUpCredentials);
   }
@@ -55,6 +63,7 @@ export class AuthController {
   @ApiResponse(apiResponseForSignInMethod)
   // swagger
   @Post('/signin')
+  @HttpCode(HttpStatus.OK)
   signIn(
     @Body() signInCredentials: SignInCredentialsDto,
   ): Promise<SigninTokenResponseDto> {
@@ -66,7 +75,7 @@ export class AuthController {
   @ApiResponse(apiResponseForChangePasswordMethod)
   // swagger
   @Put('/change-password')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     return this.authService.changePassword(changePasswordDto);
   }
