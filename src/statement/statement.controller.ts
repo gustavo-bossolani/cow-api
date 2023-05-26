@@ -1,3 +1,4 @@
+import { SkipThrottle } from '@nestjs/throttler';
 import {
   Body,
   Controller,
@@ -67,6 +68,7 @@ import { Page } from 'src/shared/components/pagination/page.model';
   apiInternalServerErrorResponseForStatementController,
 )
 //swagger
+@SkipThrottle()
 @Controller('statement')
 @UseGuards(SessionAuthGuard)
 export class StatementController {
