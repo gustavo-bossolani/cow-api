@@ -1,12 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsDefined,
+  IsOptional,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 class CreateStatementDto {
   @ApiProperty({ example: 'Cellphone' })
+  @MaxLength(40)
+  @MinLength(4)
   @IsDefined()
   title: string;
 
   @ApiProperty({ example: 'For work (Hypercard)', required: false })
+  @MaxLength(40)
+  @IsOptional()
   description?: string;
 
   @ApiProperty({
