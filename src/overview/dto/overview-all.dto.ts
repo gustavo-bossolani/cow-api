@@ -10,7 +10,7 @@ class OverviewAllDto {
   statementsPerCategory: StatementPerCategory[];
 
   @ApiProperty({ example: [{ statements: 2, amount: 2000 }] })
-  statementsWithInstallment: StatementWithInstallment[];
+  statementsWithInstallment: StatementWithInstallment;
 }
 
 interface StatementPerCategory {
