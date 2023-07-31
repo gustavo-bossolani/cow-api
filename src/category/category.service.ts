@@ -1,16 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { CategoryRepository } from 'src/category/repositories/category.repository';
-import { DefineError } from 'src/shared/models/define-error.model';
 
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilterCategoryDto } from './dto/filter-category.dto';
-import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 
 import { User } from 'src/user/entity/user.entity';
 import { Category } from './entity/category.entity';
-import { Page } from 'src/shared/components/pagination/page.model';
-import { Paginator } from 'src/shared/components/pagination/paginator.model';
 
 @Injectable()
 export class CategoryService {
@@ -22,20 +18,8 @@ export class CategoryService {
     return await this.categoryRepository.filterBy(filter, user);
   }
 
-  async getCategories(
-    user: User,
-    options: PaginatorOptionsDto,
-  ): Promise<Page<Category>> {
-    const { limit, page } = options;
-    this.logger.log(`Filtering categories for ${page} pages limit ${limit}.`);
-
-    const [results, total] = await this.categoryRepository.findAndCount({
-      take: limit,
-      skip: Paginator.calculateOffset(page, limit),
-      where: { user },
-    });
-
-    return new Page({ options, results, total });
+  async getCategories(user: User): Promise<Category[]> {
+    return this.categoryRepository.find({ where: { user } });
   }
 
   async create(createCategoryDto: CreateCategoryDto, user): Promise<void> {
@@ -51,7 +35,7 @@ export class CategoryService {
     if (!deleteStatement.affected) {
       this.logger.error('Category not found.');
 
-      throw new NotFoundException(new DefineError('Category not found', 404));
+      throw new NotFoundException('Category not found');
     }
   }
 }

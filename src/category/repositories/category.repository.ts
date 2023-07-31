@@ -1,9 +1,5 @@
 import { EntityRepository, Repository } from 'typeorm';
-import {
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 
 import { DefineError } from 'src/shared/models/define-error.model';
 
@@ -29,12 +25,10 @@ class CategoryRepository extends Repository<Category> {
     }
 
     if (name) {
-      category = await this.findOne({ name, user });
-    }
-
-    if (!category) {
-      this.logger.error('Category not found.');
-      throw new NotFoundException(new DefineError('Category not found.', 404));
+      category = await this.createQueryBuilder('category')
+        .where('LOWER(category.name) = LOWER(:name)', { name })
+        .andWhere({ user })
+        .getOne();
     }
 
     return category;
