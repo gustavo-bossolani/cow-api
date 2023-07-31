@@ -1,20 +1,28 @@
-export const countAllStatementsPerCategory = (
+export const countAllFutureStatementsPerCategory = (
   userId: string,
   defaultCategory?: string,
 ) => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
   return `
-    SELECT 
+    SELECT
+      COALESCE("category"."color", '#b3b5b4') as color,
       COALESCE("category"."name", '${
         defaultCategory ? defaultCategory : 'Other'
       }') as category,
-      COUNT(*) as quantity
+      CAST(COUNT(*) AS INTEGER) as quantity
 
     FROM "statement" "statement"
 
     LEFT JOIN "category" "category" ON "category"."id" = "statement"."categoryId"
 
-    WHERE "statement"."userId" = '${userId}'
-    GROUP BY "category"."name";
+    WHERE
+      "statement"."finishDate" >= '${year}-${
+    month < 10 ? '0' + month : month
+  }-01'
+    AND "statement"."userId" = '${userId}'
+    GROUP BY "category"."name", "category"."color";
   `;
 };
 
@@ -26,8 +34,8 @@ export const countAllFutureStatementsAndAmountIfHasInstallmentPlan = (
   const month = date.getMonth() + 1;
   return `
     SELECT
-      COUNT(*) as statements,
-      CAST(SUM(amount) AS DOUBLE PRECISION) as amount
+      CAST(COUNT(*) AS INTEGER) as statements,
+      COALESCE(CAST(SUM(amount) AS DOUBLE PRECISION), 0) as amount
     FROM
       statement
     WHERE
@@ -47,6 +55,7 @@ export const countMonthlyStatementsPerCategory = (
 ) => {
   return `
     SELECT
+      COALESCE("category"."color", '#b3b5b4') as color,
       COALESCE("category"."name", '${
         defaultCategory ? defaultCategory : 'Other'
       }') AS category,
@@ -59,7 +68,7 @@ export const countMonthlyStatementsPerCategory = (
       AND "statement"."startDate" - '${year}-${month}-01' <= 0
       AND "statement"."finishDate" - '${year}-${month}-01' >= 0
     GROUP BY
-      "category"."name";
+      "category"."name", "category"."color";
   `;
 };
 
