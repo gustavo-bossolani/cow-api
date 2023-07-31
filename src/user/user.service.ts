@@ -27,13 +27,13 @@ export class UserService {
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
     this.logger.log(`Searching for user ${changePasswordDto.username}.`);
 
-    const { newPassord, secret, username } = changePasswordDto;
+    const { newPassword, secret, username } = changePasswordDto;
 
     const user = await this.userRepository.findOne({ username });
 
     if (user && (await bcrypt.compare(secret, user.secret))) {
       const passwordSalt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(newPassord, passwordSalt);
+      const hashedPassword = await bcrypt.hash(newPassword, passwordSalt);
 
       Object.assign(user, { ...user, password: hashedPassword });
       await this.userRepository.save(user);
