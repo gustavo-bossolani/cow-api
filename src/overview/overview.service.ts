@@ -22,13 +22,15 @@ export class OverviewService {
   async getStatementsOverviewAll(user: User): Promise<OverviewAllDto> {
     this.logger.log(`Retrieving overview data for username ${user.username}.`);
 
-    const [statementsPerCategory, statementsWithInstallment] =
+    const [statementsPerCategory, statementsWithInstallmentArr] =
       await Promise.all([
-        this.statementRepository.countAllStatementsPerCategory(user),
+        this.statementRepository.countAllFutureStatementsPerCategory(user),
         this.statementRepository.countAllFutureStatementsAndAmountIfHasInstallmentPlan(
           user,
         ),
       ]);
+
+    const [statementsWithInstallment] = statementsWithInstallmentArr;
 
     return { statementsPerCategory, statementsWithInstallment };
   }
@@ -49,7 +51,10 @@ export class OverviewService {
     )) as any;
 
     if (!paginator.results.length) {
-      throw new HttpException('No results for this month', HttpStatus.OK);
+      throw new HttpException(
+        'No results for this month',
+        HttpStatus.NO_CONTENT,
+      );
     }
 
     paginator.results.map((result) => {
