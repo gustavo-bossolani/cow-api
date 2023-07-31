@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { TransformInterceptor } from './transform.interceptor';
 import { LoggerInterceptor } from './shared/interceptors/logger-interceptor/logger.interceptor';
 import { ErrorInterceptorInterceptor } from './shared/interceptors/error-interceptor/error-interceptor.interceptor';
+import { CancelProcessOnCanceledRequestInterceptor } from './shared/interceptors/cancel-process-on-canceled-request/cancel-process-on-canceled-request.interceptor';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -32,6 +33,7 @@ async function bootstrap() {
     new TransformInterceptor(),
     new LoggerInterceptor(),
     new ErrorInterceptorInterceptor(),
+    new CancelProcessOnCanceledRequestInterceptor(),
   );
 
   const port = parseInt(process.env.PORT) || 3000;
