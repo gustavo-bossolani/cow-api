@@ -46,6 +46,7 @@ class Statement {
     nullable: true,
     eager: true,
     lazy: false,
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'categoryId' })
   category?: Category;
