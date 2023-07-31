@@ -16,7 +16,7 @@ import { Category } from 'src/category/entity/category.entity';
 import { Paginator } from 'src/shared/components/pagination/paginator.model';
 import { Page } from 'src/shared/components/pagination/page.model';
 import {
-  countAllStatementsPerCategory,
+  countAllFutureStatementsPerCategory,
   countAllFutureStatementsAndAmountIfHasInstallmentPlan,
   countMonthlyStatementsPerCategory,
   countTotalMonthAmount,
@@ -103,14 +103,14 @@ class StatementRepository extends Repository<Statement> {
     this.logger.log('Statement updated.');
   }
 
-  async countAllStatementsPerCategory(
+  async countAllFutureStatementsPerCategory(
     user: User,
   ): Promise<CountStatementPerCategory[]> {
     this.logger.log(
       `Counting all future statements per category for user ${user.username}.`,
     );
 
-    return await this.query(countAllStatementsPerCategory(user.id));
+    return await this.query(countAllFutureStatementsPerCategory(user.id));
   }
 
   async countAllFutureStatementsAndAmountIfHasInstallmentPlan(
