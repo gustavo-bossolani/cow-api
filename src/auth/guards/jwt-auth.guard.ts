@@ -13,7 +13,7 @@ export class SessionAuthGuard extends AuthGuard('jwt') {
     }
 
     if (info instanceof TokenExpiredError) {
-      this.logger.error(`Expired session. ${user}`);
+      this.logger.error(`Expired session. ${user ? user : ''}`);
       throw new UnauthorizedException({
         statusCode: 401,
         message: 'Expired session.',
