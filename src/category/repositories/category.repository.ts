@@ -9,6 +9,8 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Category } from 'src/category/entity/category.entity';
 
+import { transformUpperCaseTheFirstLetter } from 'src/shared/util/upper-case-first-letter';
+
 @EntityRepository(Category)
 class CategoryRepository extends Repository<Category> {
   private logger = new Logger('CategoryRepository');
@@ -42,7 +44,10 @@ class CategoryRepository extends Repository<Category> {
 
     const { name, color } = createCategoryDto;
 
-    const found = await this.findOne({ name, user });
+    const found = await this.createQueryBuilder('category')
+      .where('LOWER(category.name) = LOWER(:name)', { name })
+      .andWhere({ user })
+      .getOne();
 
     if (found) {
       this.logger.error('Category already exists.');
@@ -52,7 +57,11 @@ class CategoryRepository extends Repository<Category> {
       );
     }
 
-    const category = this.create({ name, color, user });
+    const category = this.create({
+      name: transformUpperCaseTheFirstLetter(name),
+      color,
+      user,
+    });
 
     await this.save(category);
     this.logger.log('Category created.');
