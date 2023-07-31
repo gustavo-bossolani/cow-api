@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -40,12 +42,21 @@ import { SignUpCredentialsDto } from 'src/user/dto/sign-up-credentials.dto';
 import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
 
+import { SessionAuthGuard } from './guards/jwt-auth.guard';
+
 @ApiTags(apiTag)
 @ApiInternalServerErrorResponse(apiInternalServerErrorResponse)
 //swagger
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Get()
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  authHealth(): void {
+    return;
+  }
 
   @ApiOperation(apiOperationForSignUpMethod)
   @ApiCreatedResponse(apiCreatedResponseForSignUpMethod)
