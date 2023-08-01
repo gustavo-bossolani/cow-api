@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 
 import {
   ApiBearerAuth,
@@ -25,12 +32,15 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
 import { OverviewService } from './overview.service';
 
+import { MonthPipe } from 'src/shared/pipes/month-pipe/month-pipe.pipe';
+import { YearPipe } from 'src/shared/pipes/year-pipe/year-pipe.pipe';
+
 import { PaginatorOptionsDto } from 'src/shared/components/pagination/paginator-options.dto';
 import { OverviewAllDto } from './dto/overview-all.dto';
+import { OverviewMonthlyDto } from './dto/overview-monthly.dto';
 
 import { User } from 'src/user/entity/user.entity';
 import { Statement } from 'src/statement/entities/statement.entity';
-import { OverviewMonthlyDto } from './dto/overview-monthly.dto';
 
 @ApiTags(apiTag)
 @ApiBearerAuth()
@@ -57,8 +67,8 @@ export class OverviewController {
   getStatementsOverviewMonthly(
     @GetUser() user: User,
     @Query(ParseToNumber) options: PaginatorOptionsDto,
-    @Param('month') month: number,
-    @Param('year') year: number,
+    @Param('month', ParseIntPipe, MonthPipe) month: number,
+    @Param('year', ParseIntPipe, YearPipe) year: number,
   ): Promise<OverviewMonthlyDto<Statement>> {
     return this.service.getStatementsOverviewMonthly(
       month,

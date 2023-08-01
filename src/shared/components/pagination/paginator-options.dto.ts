@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDefined, IsNumber } from 'class-validator';
 
 class PaginatorOptionsDto {
   @ApiProperty({
@@ -9,6 +10,8 @@ class PaginatorOptionsDto {
     description: 'Set the current page',
   })
   @IsDefined()
+  @Type(() => Number)
+  @IsNumber()
   page: number;
 
   @ApiProperty({
@@ -18,6 +21,8 @@ class PaginatorOptionsDto {
     description: 'Limit of items per page',
   })
   @IsDefined()
+  @Type(() => Number)
+  @IsNumber()
   limit: number;
 }
 
