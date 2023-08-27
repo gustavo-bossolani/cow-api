@@ -40,15 +40,15 @@ export class OverviewService {
     year: number,
     user: User,
     options: PaginatorOptionsDto,
-  ): Promise<OverviewMonthlyDto<Statement>> {
+  ): Promise<OverviewMonthlyDto> {
     this.logger.log('Retrieving a month overview.');
 
-    const paginator = (await this.statementRepository.getStatementsPerMonth(
+    const paginator = await this.statementRepository.getStatementsPerMonth(
       month,
       year,
       user,
       options,
-    )) as any;
+    );
 
     if (!paginator.results.length) {
       throw new HttpException(
@@ -57,37 +57,12 @@ export class OverviewService {
       );
     }
 
-    paginator.results.map((result) => {
-      const typedResult: Statement = result;
-
-      // create installment amount
-      if (typedResult.installment > 1) {
-        result['installmentAmount'] = Number.parseFloat(
-          (typedResult.amount / typedResult.installment).toFixed(2),
+    paginator.results.map((statement) => {
+      if (statement.installment > 1) {
+        statement['installmentAmount'] = Number.parseFloat(
+          (statement.amount / statement.installment).toFixed(2),
         );
-      } else {
-        result['installmentAmount'] = typedResult.amount;
       }
-
-      // create category object
-      const { name, color, categoryId } = result;
-
-      if (result.categoryId) {
-        result.category = {
-          id: categoryId,
-          name,
-          color,
-        };
-      } else {
-        result.category = null;
-      }
-
-      delete result.name;
-      delete result.color;
-      delete result.categoryId;
-      delete result.installments;
-      delete result.userId;
-      return result;
     });
 
     const [

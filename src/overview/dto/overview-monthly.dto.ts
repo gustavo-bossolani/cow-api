@@ -5,12 +5,26 @@ import { CountStatementWithInstallment } from '../models/count-statement-with-in
 
 import { Page } from 'src/shared/components/pagination/page.model';
 
-class OverviewMonthlyDto<T> {
+import { Category } from 'src/category/entity/category.entity';
+
+interface StatementInfoDto {
+  id: string;
+  title: string;
+  description: string;
+  installment: number;
+  finishDate: string;
+  startDate: string;
+  amount: number;
+  installmentAmount?: number;
+  category?: Category | null;
+}
+
+class OverviewMonthlyDto {
   @ApiProperty()
   monthlyAmount: number;
 
   @ApiProperty()
-  paginator: Page<T>;
+  paginator: Page<StatementInfoDto>;
 
   @ApiProperty({
     example: [
@@ -26,4 +40,4 @@ class OverviewMonthlyDto<T> {
   statementsWithInstallmentPlan: CountStatementWithInstallment[];
 }
 
-export { OverviewMonthlyDto };
+export { OverviewMonthlyDto, StatementInfoDto };

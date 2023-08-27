@@ -176,12 +176,33 @@ class StatementRepository extends Repository<Statement> {
       })
       .andWhere({ user });
 
-    const [total, results] = await Promise.all([
+    const [total, statementsInQueryFormat] = await Promise.all([
       statementQueryForTotal.getCount(),
       this.query(getStatementsPerMonth(user.id, year, month, limit, skip)),
     ]);
 
-    return new Page({ options, results, total });
+    const statements: Statement[] = statementsInQueryFormat.map((result) => {
+      const { categoryName, categoryColor, categoryId } = result;
+
+      if (result.categoryId) {
+        const category = {
+          id: categoryId,
+          name: categoryName,
+          color: categoryColor,
+        };
+        result = Object.assign({}, result, { category });
+      } else {
+        result.category = null;
+      }
+
+      delete result.categoryName;
+      delete result.categoryColor;
+      delete result.categoryId;
+
+      return result;
+    });
+
+    return new Page({ options, results: statements, total });
   }
 
   async countTotalMonthAmount(

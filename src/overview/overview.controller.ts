@@ -69,7 +69,7 @@ export class OverviewController {
     @Query(ParseToNumber) options: PaginatorOptionsDto,
     @Param('month', ParseIntPipe, MonthPipe) month: number,
     @Param('year', ParseIntPipe, YearPipe) year: number,
-  ): Promise<OverviewMonthlyDto<Statement>> {
+  ): Promise<OverviewMonthlyDto> {
     return this.service.getStatementsOverviewMonthly(
       month,
       year,

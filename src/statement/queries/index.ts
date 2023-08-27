@@ -134,8 +134,8 @@ export const getStatementsPerMonth = (
       CAST(statement.amount AS DOUBLE PRECISION),
       statement.installment,
       statement."categoryId",
-      category.name,
-      category.color
+      category.name as "categoryName",
+      category.color as "categoryColor"
     FROM
       statement
       LEFT JOIN category ON category.id = "statement"."categoryId" 
