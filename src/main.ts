@@ -36,7 +36,7 @@ async function bootstrap() {
     new CancelProcessOnCanceledRequestInterceptor(),
   );
 
-  const port = parseInt(process.env.PORT) || 3000;
+  const port = parseInt(process.env.PORT);
 
   await app.listen(port);
   logger.log(`Application listening on ${port}`);
