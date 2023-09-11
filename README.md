@@ -12,11 +12,11 @@ $ npm install
 
 ## Setting the .env config
 
-You need to change the `.env` values to provide to the application the correct connection and rules.
+You need to create the `.env` file to provide to the application the correct connection and rules.
 
-The application already have a configured `.env` file with mock and local information, if you want to change some value is up to you. You can use the example bellow:
+You can use the example bellow:
 
-```enviroment
+```yml
 # ENV
 ENV=dev
 
@@ -35,7 +35,7 @@ JWT_SECRET=P3ZANUFqZjtCcV50JFhSZQ==
 JWT_EXPIRESIN=3600
 
 ```
-All the information provided on `.env` file is being validated with [Joi](https://docs.nestjs.com/techniques/configuration#schema-validation).
+All the information provided on <b>.env</b> file is being validated with [Joi](https://docs.nestjs.com/techniques/configuration#schema-validation).
 
 ## Running the application
 
@@ -78,3 +78,35 @@ $ migration:create [name]
 # drop the database
 $ db:revert
 ```
+
+## Docker 
+
+The cow-api holds a Dockerfile for a new docker image build.
+
+```bash
+# Choose a unique tag name for your image docker compose will use it. 
+# to create a new image run
+docker build . --tag cow-api-dev
+```
+### Compose
+
+The project also holds a <b>docker-compose</b> file.
+
+For the compose file take a look on the <b>cow-api-dev -> image -> value</b>.
+
+```yml
+# ---------
+services:
+    # ---------
+    cow-api-dev:
+      image: cow-api-dev # <- this value requires to be equal of image's name.
+    # ---------
+  # ---------
+# ---------
+```
+
+```bash
+# to run all the necessary components for the app run
+docker-compose up
+```
+Note: the compose file mention environment variables, you can use the .env file to fill those.
