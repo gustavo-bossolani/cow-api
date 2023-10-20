@@ -1,6 +1,6 @@
 version: '3'
 services:
-  postgres:
+  database:
     image: postgres
     container_name: database
     ports:
@@ -9,24 +9,27 @@ services:
       - POSTGRES_DB=${DATABASE_DATABASE}
       - POSTGRES_USER=${DATABASE_USERNAME}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-
+      - DATABASE_HOST=${DATABASE_HOST}
   cow-api-dev:
     image: cow-api-dev
     container_name: cow-api
+    volumes:
+      - ./:/src/
     env_file: .env
     depends_on:
-      - postgres
+      - database
     links:
-      - postgres
+      - database
     ports: 
       - 3000:3000
     environment:
       - ENV
       - PORT
-      - DATABASE_HOST=postgres
+      - DATABASE_HOST=database
       - DATABASE_PORT
       - DATABASE_USERNAME
       - DATABASE_PASSWORD
       - DATABASE_DATABASE
       - JWT_SECRET
       - JWT_EXPIRESIN
+    
