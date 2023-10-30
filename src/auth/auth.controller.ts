@@ -43,6 +43,7 @@ import { SignInCredentialsDto } from 'src/user/dto/sign-in-credentials.dto';
 import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
 
 import { SessionAuthGuard } from './guards/jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags(apiTag)
 @ApiInternalServerErrorResponse(apiInternalServerErrorResponse)
@@ -51,6 +52,7 @@ import { SessionAuthGuard } from './guards/jwt-auth.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Throttle(20, 1000)
   @Get()
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
